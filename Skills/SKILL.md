@@ -1,6 +1,6 @@
 ---
 name: e2sc-playwright
-description: 'Write, run, and debug Playwright UI tests that drive the live remote E2open SCPM/SSP dev server (the e2sc-ui_tests harness). Use for: "add a Playwright test", "write a UI test", "test a field / dropdown / text field / column / button / workflow", "run the playwright tests", "codegen a selector", "why is this UI test failing", iframe/rcp_content selector problems, menu navigation, login helper. Also use to UI-verify any config change made via the e2sc-*/alert-config/e2na-config skills: "test a state transition / action button", "verify a download button / configurator", "check a field label", "test an alert filter / subscription", "verify a new column / data measure". Knows the iframe (rcp_content) pattern, login flow, the FULL application menu map (all 9 groups / ~90 items via navigateToMenuItem), the shared helpers module, the field-control patterns (text / native select / complex-combobox — with Order Type as the worked example), the by-domain config→UI testing map, and how the suite encodes verified gaps (RED known-defect tests + test.fail / test.fixme markers).'
+description: 'Write, run, and debug Playwright UI tests that drive the live remote E2open SCPM/SSP dev server (the e2sc-ui_tests harness). Use for: "add a Playwright test", "write a UI test", "test a field / dropdown / text field / column / button / workflow", "run the playwright tests", "codegen a selector", "why is this UI test failing", iframe/rcp_content selector problems, menu navigation, login helper. Also use to UI-verify any config change made via the e2sc-*/alert-config/e2na-config skills: "test a state transition / action button", "verify a download button / configurator", "check a field label", "test an alert filter / subscription", "verify a new column / data measure". Also covers DOWNLOADED-FILE assertions: "download a shipment/PO into Excel", "check the .xlsx columns", "validate the download template / spreadsheet contents", "assert the produced file" — Playwright captures the download, exceljs reads the workbook. Knows the iframe (rcp_content) pattern, the rcp_content_modal layer where generated files are offered, login flow, the FULL application menu map (all 9 groups / ~90 items via navigateToMenuItem), the shared helpers module, the field-control patterns (text / native select / complex-combobox — with Order Type as the worked example), the by-domain config→UI testing map, and how the suite encodes verified gaps (RED known-defect tests + test.fail / test.fixme markers).'
 ---
 
 # E2open SCPM Playwright UI Testing (e2sc-playwright)
@@ -23,6 +23,8 @@ There is **one** standalone Playwright package in this repo, **`e2sc-ui_tests/`*
 | `d-search-filter.spec.ts` | 4 | filter drive via the checkbox panel; grid asserts loosened |
 | `e-download.spec.ts` | 2 | TC-E1 live; TC-E2 `test.fixme` (table-editor path TBD) |
 | `e2-download-asn-datameasure.spec.ts` | 2 | `#dataMeasure` combobox, asserts all **three** measures |
+| `e3-download-shipment-excel.spec.ts` | 4 | **downloads a real .xlsx and parses it** (exceljs). TC-E3-1 passes; **TC-E3-2 is a RED known-defect test** (the server job ends `Completed With Errors`); TC-E3-3/E3-4 `test.fixme` until the column labels / a seeded BOL are known |
+| `_excel-selftest.spec.ts` | 4 | **offline** — no server, no login. Verifies the `excel.ts` parsers (header discovery past title rows, cell normalisation) and doubles as the build-an-.xlsx-for-upload example. All pass. |
 | `f-readonly-display.spec.ts` | 3 | TC-F3 is a **RED known-defect** test; F1/F2 `test.fixme` |
 | `g-edge-cases.spec.ts` | 4 | TC-G4 is the suite's **only `test.fail`**; G1–G3 `test.fixme` |
 | `h-performance.spec.ts` | 2 | advisory latency budgets (8s search / 3s dropdown) |
@@ -30,7 +32,7 @@ There is **one** standalone Playwright package in this repo, **`e2sc-ui_tests/`*
 | `z-mrp-type-filters.spec.ts` | 17 | MRP Type=ZS filters — **weakest spec, see the note below** |
 | `_menu-discovery` / `_form-discovery` | 2 | maintenance tools, gated by `MENU_DISCOVERY` / `FORM_DISCOVERY` |
 
-**55 tests + 2 gated maintenance tools.** Markers actually in the code: **1** `test.fail` (TC-G4), **12** `test.fixme`, **4** plain-but-expected-to-fail RED defect tests. `e2sc-ui_tests/README.md` still claims "23 passed, 13 skipped, 0 failed" and "five `test.fail` markers" — that is **stale**; trust the specs, not the README's counts.
+**63 tests + 2 gated maintenance tools** (65 listed by `--list`). Markers actually in the code: **1** `test.fail` (TC-G4), **14** `test.fixme`, **5** plain-but-expected-to-fail RED defect tests. `e2sc-ui_tests/README.md` still claims "23 passed, 13 skipped, 0 failed" and "five `test.fail` markers" — that is **stale**; trust the specs, not the README's counts.
 
 ## Testing any field or element — this skill is generic
 
@@ -43,6 +45,21 @@ Two rules that make any such test reliable:
 - **AllBundles is the visible text.** Assert on the label `e2sc-cfg` maps a model ID to (`USER_ACTION_202` → `Update Date`), not the raw ID. And remember role-gated visibility: this harness only sees the `e2open_super_user` view.
 
 Do **not** invent selectors for elements the harnesses have never driven — discover them with `npm run codegen`.
+
+## Asserting the contents of a downloaded file (Excel)
+
+Two halves: **Playwright captures the download, `exceljs` reads the workbook** — Playwright itself cannot read a spreadsheet. `exceljs` is a devDependency of `e2sc-ui_tests` (added 2026-08-20) and the parsing helpers live in **`tests/excel.ts`**, deliberately separate from `helpers.ts` because they take no `Page`/`Frame` (so they also serve to *build* an .xlsx for an upload flow).
+
+Non-obvious mechanics, all verified live:
+- **The generated file is offered inside a second iframe, `rcp_content_modal`** — a locator scoped to `rcp_content` will never see it. Use `getRcpModalFrame(page)`.
+- **Save before the context closes.** Playwright deletes downloads on context close, so anything to be parsed must go through `saveDownload(download, prefix)` → `test-results/downloads/`. Prefix it: the suite is serial on one account and several flows emit the same filename (`shipmentBR.xlsx`).
+- **Row 1 is not reliably the header row** — E2open workbooks can carry title/parameter rows above the grid. Use `findHeaderRow(ws, { mustContain })`, never `getRow(1)`.
+- **Normalise cells before comparing.** Values arrive as rich text, formula results, hyperlinks, dates or numbers depending on spec formatting; `cellText` / `rowTexts` reduce all of those to the string a human sees.
+- **The download is a queued JOB.** Clicking **Next** issues a job and opens a **Job Status → Job List** modal; the File Name is plain text until the job completes, then becomes a link. A codegen recording *looks* direct only because the job finished while the human was clicking. Poll with `waitForDownloadJobLink`, and **raise the test timeout** — Playwright's 30s default is shorter than the job (`test.setTimeout(300000)`).
+- **A job can end `Completed With Errors`** — no link ever appears. The helper aborts on that status and `captureJobErrorFile` saves the row's "Click to download the error file" attachment into the thrown error. That is a server-side failure to chase with `e2sc-logging` / `e2sc-io`, never a test to soften.
+- **Check the extension** from `download.suggestedFilename()` (`.xlsx` vs `.csv` vs `.zip`) rather than assuming exceljs applies.
+
+**Never invent the expected column labels.** Run the download once, read the real header list out of the `shipment-download-columns.json` attachment TC-E3-2 emits, seed the constant, then turn the strict test on. `e3-download-shipment-excel.spec.ts` is the worked example; guide.md § *Downloading a file and asserting its contents* has the full pattern.
 
 ## Reference Documentation
 **Primary Source:** `skills/e2sc-playwright/guide.md` — read this first for the iframe pattern, login helper, menu navigation map, selector conventions, the combobox internals, and run commands.
@@ -71,6 +88,7 @@ The suite uses **two different conventions** for this — know which one you're 
 | `TC-A2: Search dropdown includes "Planner Change Request"` | `a-ui-display.spec.ts` | only `SAP Order` + `PG Change Request` are configured |
 | `TC-A3: Summary dropdown shows Order Type values` | `a-ui-display.spec.ts` | same Summary-form gap as TC-A1 |
 | `TC-F3: Order Type visible in Purchase Order Problem Summary (Exceptions)` | `f-readonly-display.spec.ts` | field absent from PO Problem Summary; plan requires it read-only |
+| `TC-E3-2: Shipment download yields a readable .xlsx` | `e3-download-shipment-excel.spec.ts` | the `ShipmentBRExcelDownload` job ends **`Completed With Errors`** in ~15-20s and no `shipmentBR.xlsx` is produced (verified over 3 runs, 2026-08-20). Server-side: check the error file / `e2sc.log`, then the IoDocTypeDef (`e2sc-io`). |
 
 **2. `test.fail` markers (one test only).** `TC-G4: Order Type filter persists across navigation` in `g-edge-cases.spec.ts` — Playwright reports a fail-as-expected as **passed**. Flip to plain `test()` only once persistence is actually implemented.
 
@@ -141,10 +159,13 @@ npm run codegen        # opens recorder against the logon page
 ### File locations
 ```
 e2sc-ui_tests/tests/*.spec.ts                # specs: a-ui-display … i-regression, e2-download-asn-datameasure, z-mrp-type-filters
-e2sc-ui_tests/tests/helpers.ts               # shared login / navigation (MENU_MAP + navigateToMenuItem) / iframe / Order Type / data measures / autocomplete / PO Search
+e2sc-ui_tests/tests/helpers.ts               # shared login / navigation (MENU_MAP + navigateToMenuItem) / iframe + modal iframe / download capture / Order Type / data measures / autocomplete / PO Search
+e2sc-ui_tests/tests/excel.ts                 # exceljs workbook reading: openWorkbook, findHeaderRow, columnValues, cellText (no Page/Frame — also usable to BUILD an upload .xlsx)
+e2sc-ui_tests/test-results/downloads/         # where saveDownload() persists captured files (Playwright deletes them otherwise)
 e2sc-ui_tests/menu-map.json                  # raw live dump of the full application menu (2026-07-06)
 e2sc-ui_tests/form-map-po-search.json        # raw live dump of PO Search form fields (2026-07-07, by _form-discovery.spec.ts)
 e2sc-ui_tests/recorded-menu-session.ts       # raw codegen recording kept as a selector reference (not a spec)
+e2sc-ui_tests/tests/_excel-selftest.spec.ts  # OFFLINE self-test of excel.ts (no server / no login) — run it to prove the parsers still work
 e2sc-ui_tests/tests/_menu-discovery.spec.ts  # regenerates menu-map.json (gated: MENU_DISCOVERY=1)
 e2sc-ui_tests/tests/_form-discovery.spec.ts  # regenerates form-map-po-search.json (gated: FORM_DISCOVERY=1)
 e2sc-ui_tests/playwright.config.ts           # serial (workers:1), E2_BASE_URL override, retries:1
@@ -161,6 +182,7 @@ $env:SUPER_USER_PASSWORD = "<pwd>"           # PowerShell; export … on bash
 npx playwright test --project=chromium       # run all (chromium configured; serial in e2sc-ui_tests)
 npx playwright test a-ui-display.spec.ts     # single file
 npx playwright test -g "TC-A2"               # single test by id (e2sc-ui_tests) or title substring
+npx playwright test _excel-selftest          # offline — verifies the excel.ts parsers, no server needed
 npm run test:headed | test:debug | test:ui   # headed / inspector / UI mode
 npm run report                               # open last HTML report
 npm run codegen                              # record selectors / discover menu positions
@@ -188,9 +210,25 @@ openOrderManagementMenu(page)                   // legacy: Menu → Order Manage
 navigateToWorkflow(page, workflowName)          // legacy: Menu → Order Management → PO nth-child (5 items)
 navigateToDownloadPurchaseOrder(page)           // legacy: Menu → Downloads → Download Purchase Order
 navigateToDownloadAsnForSmiSupplier(page)       // legacy: Menu → Downloads → Download ASN for SMI Suppliers (.nth(1))
+navigateToDownloadShipment(page)                // Menu → Downloads → Shipment → Shipment (getByTitle('Download Shipment').nth(1))
 navigateToPurchaseOrderExceptions(page)         // legacy: Menu → Exceptions → Purchase Order (exact:true)
 getRcpFrame(page)                               // returns the rcp_content iframe frame
+getRcpModalFrame(page, timeout?)                // returns the rcp_content_modal frame — the MODAL layer (generated-file links live here)
 frameBodyText(frame)                            // whole-frame text — includes hidden DOM, use sparingly
+```
+Download capture + workbook assertions:
+```ts
+// helpers.ts — Playwright side
+saveDownload(download, prefix?)                 // persist to test-results/downloads/ and return the path (MUST do this before context close)
+downloadShipmentWorkbook(page, opts?)           // full Shipment flow → { file, suggestedFilename, size }
+                                                // opts: { bolNumber, fileLink /\.xlsx$/i, savePrefix, timeout }
+DOWNLOAD_DIR, SHIPMENT_DOWNLOAD_FIELDS          // save location; criteria labels ({ BOL_NUMBER })
+
+// excel.ts — exceljs side (no Page/Frame)
+openWorkbook(file), sheet(wb, name?), sheetNames(wb)
+findHeaderRow(ws, { mustContain?, searchRows? })  // survives title/parameter rows above the grid
+dataRows(ws, header), columnValues(ws, header, label), rowRecord(header, row)
+cellText(value), rowTexts(row), columnIndexOf(header, label)
 ```
 Constants: `SUPER_USER_USERNAME`, `LOGIN_URL`, `ORDER_TYPE_FIELD_ID`, `ORDER_TYPE_VALUES`, `LEGACY_PG_FIELD_LABEL`, `WORKFLOW_POSITIONS`, `MENU_MAP` (+ the `MenuSection` interface).
 The **full application menu is mapped** (9 top-level groups, ~90 items — dumped live 2026-07-06 by `_menu-discovery.spec.ts`): `MENU_MAP` in `helpers.ts`, raw dump in `e2sc-ui_tests/menu-map.json`, full tree table in `guide.md` § Menu Navigation Map. **All three were re-verified as matching on 2026-08-14** — the guide's table is a faithful copy of the discovery output, so use it as the authority for exact labels instead of hand-writing text locators (traps: `Forecast / Inventory` with spaces, `Create Shipment From Collab`, and `Shipment (2)` for Order Management's duplicate section). `navigateToMenuItem` throws a "Menu drift" error if the menu changes; regenerate with `$env:MENU_DISCOVERY="1"; npx playwright test _menu-discovery` and update `MENU_MAP` **and** the guide's table together.
@@ -239,7 +277,7 @@ Locate the field by stable `id` (`[id="<Object>.<Attr>"]`) or by `label:has-text
 Prefer a field-specific helper over scraping `frame.locator('body').textContent()`.
 
 ### Iframe rule
-The app renders inside `iframe[name="rcp_content"]`. Use:
+The app renders inside `iframe[name="rcp_content"]` — **plus a second frame, `iframe[name="rcp_content_modal"]`, for modal dialogs** (where a generated download is offered as a link). Use `getRcpFrame` / `getRcpModalFrame` respectively; a `rcp_content`-scoped locator never sees modal content. Use:
 ```ts
 const frame = await getRcpFrame(page);
 await expect(frame.locator('label:has-text("<Field Label>")')).toBeVisible({ timeout: 15000 });

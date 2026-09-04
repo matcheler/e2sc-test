@@ -26,9 +26,10 @@
 
 There is **one** standalone Playwright test harness in this repo, **`e2sc-ui_tests/`** (the older `playwright-demo/` was deleted 2026-07-01). It is independent of the `solution/` build tree — it does **not** build or deploy anything. Its job is to drive a **live, remote** E2open dev server through a browser and assert that configuration behaves correctly end-to-end.
 
-It implements multiple test suites (**55 tests + 2 gated maintenance tools**, verified 2026-08-14):
+It implements multiple test suites (**63 tests + 2 gated maintenance tools**, `--list` reports 65, verified 2026-08-20):
 - **Order Type suite** (11+4+3+4+2+3+4+2+3 tests): categorised specs `a-ui-display` … `i-regression`, each test carrying a TC-ID.
 - **Data Measures** (Download ASN for SMI Suppliers): `e2-download-asn-datameasure.spec.ts` (2 tests).
+- **Downloaded-file contents** (Shipment → Excel): `e3-download-shipment-excel.spec.ts` (4 tests) — the only suite that asserts inside a produced file; see § *Downloading a file and asserting its contents*.
 - **MRP Type Filters**: `z-mrp-type-filters.spec.ts` (17 tests — **the weakest spec; see its section below before copying anything from it**).
 - **Maintenance tools**: `_menu-discovery.spec.ts` (regenerates the full application menu map) and `_form-discovery.spec.ts` (regenerates PO Search form map).
 
@@ -58,7 +59,8 @@ e2sc-ui_tests/             # the only harness (Order Type suite + additional tes
 ├── form-map-po-search.json    # raw live dump of PO Search form (2026-07-07, by _form-discovery.spec.ts)
 ├── recorded-menu-session.ts   # raw codegen recording kept as a selector reference (not a spec)
 ├── tests/
-│   ├── helpers.ts                      # SHARED login / navigation / iframe / Order Type / data measures / autocomplete / PO Search
+│   ├── helpers.ts                      # SHARED login / navigation / iframe + modal iframe / download capture / Order Type / data measures / autocomplete / PO Search
+│   ├── excel.ts                        # SHARED exceljs workbook reading (no Page/Frame — also usable to BUILD an upload .xlsx)
 │   ├── _menu-discovery.spec.ts         # maintenance tool: regenerates menu-map.json (gated by MENU_DISCOVERY=1)
 │   ├── _form-discovery.spec.ts         # maintenance tool: regenerates form-map-po-search.json (gated by FORM_DISCOVERY=1)
 │   ├── a-ui-display.spec.ts            # Section A (TC-A1..A7, 11 tests) — Order Type field presence + dropdown values per workflow. 3 RED defects
@@ -67,6 +69,8 @@ e2sc-ui_tests/             # the only harness (Order Type suite + additional tes
 │   ├── d-search-filter.spec.ts         # Section D (4) — drive the Order Type filter via the checkbox panel + submit search
 │   ├── e-download.spec.ts              # Section E (2) — Order Type in Download PO workflow. TC-E2 fixme (table-editor path)
 │   ├── e2-download-asn-datameasure.spec.ts  # Section E2 (2) — #dataMeasure combobox: available + default-selected measures
+│   ├── e3-download-shipment-excel.spec.ts   # Section E3 (4) — downloads a real .xlsx from the Shipment flow and PARSES it. TC-E3-2 is a RED defect (job "Completed With Errors"); E3-3/E3-4 fixme
+│   ├── _excel-selftest.spec.ts         # OFFLINE (4) — no server/login: verifies the excel.ts parsers + shows how to BUILD an .xlsx for upload tests
 │   ├── f-readonly-display.spec.ts      # Section F (3) — read-only display: PO Problem Summary (TC-F3, RED defect); List/Details fixme
 │   ├── g-edge-cases.spec.ts            # Section G (4) — NULL/invalid values, concurrency (fixme) + TC-G4 filter persistence (the only test.fail)
 │   ├── h-performance.spec.ts           # Section H (2) — client-observed latency, advisory budgets (8s search, 3s dropdown open)
@@ -90,7 +94,7 @@ Always run from inside `e2sc-ui_tests/`:
 
 ```bash
 cd e2sc-ui_tests
-npm install                                  # first time only
+npm install                                  # first time only (brings @playwright/test + exceljs)
 npx playwright install                        # first time (e2sc-ui_tests): download chromium
 
 $env:SUPER_USER_PASSWORD = "<pwd>"           # PowerShell — set before authenticated runs
@@ -127,9 +131,14 @@ import {
   navigateToMenuItem, openMenuGroup, MENU_MAP,           // generic — reaches EVERY menu item
   navigateToWorkflow, navigateToDownloadPurchaseOrder, navigateToPurchaseOrderExceptions,
   navigateToDownloadAsnForSmiSupplier,                   // legacy helpers (remain for existing specs)
+  navigateToDownloadShipment,                            // Menu → Downloads → Shipment → Shipment
   
   // iframe access
-  getRcpFrame,
+  getRcpFrame, getRcpModalFrame,                         // rcp_content / rcp_content_modal
+  
+  // download capture (see § Downloading a file and asserting its contents)
+  saveDownload, downloadShipmentWorkbook,
+  DOWNLOAD_DIR, SHIPMENT_DOWNLOAD_FIELDS,
   
   // Order Type combobox (worked example)
   orderTypeContainer, orderTypeSelect, orderTypeOptions, waitForOrderType,
@@ -155,6 +164,14 @@ import {
   // Utilities
   frameBodyText,
 } from './helpers';
+
+// Workbook reading is a SECOND module (no Page/Frame in it):
+import {
+  openWorkbook, sheet, sheetNames,
+  findHeaderRow, columnIndexOf,
+  dataRows, columnValues, rowRecord,
+  cellText, rowTexts,
+} from './excel';
 ```
 
 ### Login — `loginAsSuper(page)`
@@ -196,6 +213,16 @@ async function getRcpFrame(page: Page) {
   return frame;
 }
 ```
+
+### modal iframe — `getRcpModalFrame(page, timeout = 60000)`
+There is a **second** app frame, `iframe[name="rcp_content_modal"]`, for modal dialogs. Discovered by codegen 2026-08-20 on the Shipment download flow, where the generated file is offered as a link *inside the modal* — a `rcp_content`-scoped locator never sees it:
+
+```ts
+const modal = await getRcpModalFrame(page);
+await modal.getByRole('link', { name: /\.xlsx$/i }).click();
+```
+
+The default timeout is 60s because the modal only appears once the server has finished generating the file. Whenever an action opens a dialog and your locator finds nothing, check whether the content moved into this frame.
 
 ### Field-specific helpers (e2sc-ui_tests only)
 
@@ -247,6 +274,62 @@ Same `eto-complex-combobox` pattern as Order Type, but for a different field (`i
 > The available/selected assertions map to the two config knobs: available list = `&dataMeasure=`, default-checked = `&DefaultDMs=` (see the `e2sc-rcp` guide). A measure present in `dataMeasureOptionTexts` but absent from `dataMeasureSelectedTexts` means `&DefaultDMs=` wasn't updated (or didn't deploy) — not a test bug.
 
 > **The `#dataMeasure` / Next-wizard pattern is not ASN-specific.** A live codegen session (2026-07-06) confirmed the same shape on other download flows: **Download Supplier Inventory** also has a `#dataMeasure` combobox behind a **Next** step, and **Forecast/Supply Plan** / **Inventory** downloads present a data-measure checkbox step (e.g. "Committed Projected Inventory") behind **Next** with a `#eto13` control. Upload flows share a common "Or select file" affordance inside the `rcp_content` frame. Reuse the `dataMeasure*` helpers for these; discover any per-flow quirk with codegen before asserting.
+
+## Downloading a file and asserting its contents
+
+Playwright captures the download; **`exceljs` reads the workbook** — Playwright has no spreadsheet support. `exceljs` is a devDependency of `e2sc-ui_tests` (added 2026-08-20); the parsing helpers are in `tests/excel.ts`, kept out of `helpers.ts` because they take no `Page`/`Frame` and therefore also serve to *build* an .xlsx for an upload flow.
+
+### The download is a queued JOB, not a direct file (verified live 2026-08-20)
+
+This is the thing that breaks naive download tests. Clicking **Next** on a download flow does not return a file — it issues a job (`Acknowledgment - Request successfully issued. Page will automatically refresh in 5 seconds.`) and opens a **Job Status** modal in the `rcp_content_modal` iframe containing a **Job List** table:
+
+| Document Type | File Name | Status | Creation Time | Completion Time | Comments |
+|---|---|---|---|---|---|
+| `ShipmentBRExcelDownload` | `shipmentBR.xlsx` | `In Process` | `08/20/26:09:07:18` | | |
+
+While Status is `In Process` the **File Name is plain text**. It becomes a **link** only once the job completes, and clicking that link fires the browser download. The panel self-refreshes every ~5s and also carries a `refresh` button.
+
+A codegen recording of this flow *looks* like a direct download (`waitForEvent('download')` right after clicking the file link) purely because the job had already completed while the human was recording. Automated, you must **poll**:
+
+```ts
+const link = await waitForDownloadJobLink(page, /\.xlsx$/i, 180000);  // re-acquires the modal each poll
+```
+
+`waitForDownloadJobLink` throws with the last-seen Job List state, so a stuck job reads as `Last Job List state: [{"status":"In Process",…}]` — that is a **server-side** problem, not a test bug. `jobStatusRows(modal)` reads the table if you want to assert the Document Type.
+
+**Status can be terminal-but-failed.** A job may end **`Completed With Errors`**, in which case no file link ever appears and polling to the timeout is wasted. `waitForDownloadJobLink` aborts on `/completed with errors|failed|error/i` immediately, and the failed row offers a **"Click to download the error file"** link (`ioInbox.do?ACTION=DOWNLOAD&RequestId=…&IsErrorFile=1`) — `captureJobErrorFile(page)` fetches it and inlines a text preview into the thrown error, so the reason is in the test output instead of buried in a screenshot. Verified live on the Shipment flow 2026-08-20 (`ShipmentBRExcelDownload` → `Completed With Errors` in ~15-20s). When you see this, the remedy is server-side: check `/e2open/var/log/e2sc/e2sc.log` (`e2sc-logging`) and the IoDocTypeDef for the document type (`e2sc-io`).
+
+> **The Job List panel re-navigates its own iframe every ~5s, and that breaks waiting.** Three live runs failed to capture the error file with `getByRole('link', …).waitFor({ state: 'visible' })` even though the aria snapshot showed the link present the whole time — every 8s wait window straddled a refresh, which destroys the execution context. **Anything you do in this panel must be a single quick operation, not a wait.** `captureJobErrorFile` therefore reads the `href` (`a[href*="IsErrorFile=1"]` — an attribute read, not a name match) and fetches it with `page.request.get()`, which carries the session cookies and is immune to the frame reloading underneath. Apply the same tactic to any self-refreshing E2open panel.
+
+**Raise the test timeout.** Playwright's default is **30s** per test and the job routinely outlives it — the first version of TC-E3-2 failed on exactly this, with the misleading message `waiting for … getByRole('link', …)`. Use `test.setTimeout(300000)` in any test that downloads.
+
+### The two halves, end to end
+
+```ts
+test('downloads and validates the workbook', async ({ page }) => {
+  test.setTimeout(300000);                       // queued job — NOT the 30s default
+  await loginAsSuper(page);
+  await navigateToDownloadShipment(page);
+
+  const { file, suggestedFilename } = await downloadShipmentWorkbook(page, { savePrefix: 'tc-x' });
+  expect(suggestedFilename).toBe('shipmentBR.xlsx');
+
+  const ws = sheet(await openWorkbook(file));
+  const header = findHeaderRow(ws);               // NOT getRow(1) — see below
+  expect(header.headers).toContain('<real column label>');
+  expect(columnValues(ws, header, '<real column label>')).not.toHaveLength(0);
+});
+```
+
+Rules that matter when parsing:
+- **Save before the context closes.** Playwright deletes downloads on context close — `saveDownload(download, prefix)` persists to `test-results/downloads/`. Always prefix: the suite is serial on one account and flows collide on filenames (`shipmentBR.xlsx`).
+- **Row 1 is not reliably the header row** — workbooks can carry title/parameter rows above the grid. `findHeaderRow(ws, { mustContain })` scans for the first row with 2+ filled cells (and the named labels when given).
+- **Normalise cells.** Values arrive as rich text, formula results, hyperlinks, dates or numbers depending on the spec's formatting; `cellText` / `rowTexts` reduce them to the string a human sees. Don't compare raw `cell.value`.
+- **Check the extension** from `download.suggestedFilename()` before reaching for exceljs — a flow may emit `.csv` or a `.zip`, in which case parse with `fs` / an unzip step instead.
+- **Never invent the expected column labels.** Run the download once, read the real header list from the `shipment-download-columns.json` attachment TC-E3-2 emits (`npm run report`), seed the constant, *then* turn the strict assertion on. `e3-download-shipment-excel.spec.ts` keeps TC-E3-3 as `test.fixme` for exactly this reason.
+
+### Upload templates — the same helpers, reversed
+To test an upload spec, build a workbook with exceljs (`new ExcelJS.Workbook()` → `addRow` → `writeFile`), feed it with `setInputFiles()` inside the `rcp_content` frame ("Or select file" affordance), then assert the platform's validation messages. This is often the more valuable test when what you actually want to verify is a mapping spec.
 
 ## The rcp_content iframe Pattern
 
@@ -331,7 +414,7 @@ Top-level groups (buttons revealed by the **Menu** button): `Exceptions`, `Forec
 
 Notes:
 - **Exact-label traps** (the map is the authority — hand-written text locators get these wrong): the group is `Forecast / Inventory` **with** spaces, the item is `Create Shipment From Collab` (capital *F*, *Collab* not *Colab*), and Exceptions → Purchase Order needs `{ exact: true }` because `Purchase Order` is a prefix of other items. `z-mrp-type-filters.spec.ts` gets the first two wrong — see its section.
-- **Duplicate-text traps**: some item texts appear more than once in the open menu DOM — codegen recorded `getByText('Master Data Upload').nth(1)` (Uploads) and `.nth(1)` for "Download ASN for SMI Suppliers" (Downloads). `navigateToMenuItem` is positional so it is immune; if you hand-write a text locator instead, expect to need `.nth()`.
+- **Duplicate-text traps**: some item texts appear more than once in the open menu DOM — codegen recorded `getByText('Master Data Upload').nth(1)` (Uploads), `.nth(1)` for "Download ASN for SMI Suppliers", and `getByTitle('Download Shipment').nth(1)` for Downloads → Shipment → **Shipment** (whose link carries `title="Download Shipment"`). `navigateToMenuItem` is positional so it is immune; if you hand-write a text locator instead, expect to need `.nth()`.
 - **Order Management column 2 has TWO sections both headed "Shipment"** (identical items); `MENU_MAP` disambiguates the second as `Shipment (2)`.
 - **"Long Tail Partner Initialization"** and **"Download Schedules Initialization"** under Master Data are headings with **no link items**.
 - The **"Purchase Order Customizable Download"** location (Downloads → Purchase Order, position 4) is now confirmed — previously an unconfirmed-path `test.fixme`.
@@ -393,7 +476,7 @@ The harness's field-level assertions today drive **Order Type** (`PoRequestSched
 | `e2sc-ocmm` | State badges, action **buttons**, transitions, relationship link-cards, audit history | Order/PO detail view (drill in from Search/Summary) | Button text = the **action label** (from AllBundles); state badge = **user-state name** + icon class (`thumb_up-green`, `eject-red`, `local_shipping-blue`…). Clicking an action should move the badge to the next state. |
 | `e2sc-pcmm` | New **fields/columns** in CollabList (MTIM/forecast/inventory) views + the column-picker | The relevant CollabList workflow | Field name → visible **column header**; `widget="AutoComplete"` fields render an autocomplete control (only on `Collab` ObjectName). |
 | `e2sc-rcp` | New **MCV timeline columns**, totals/summary rows, decimal formatting, role-gated columns, **download-filter data measures** | MCV / timeline grid (e.g. `procFcstVMISearch`); the "Select Data Measure" step of a PIT/collab download | Column header = `TITLEDATAMEASURE`; left-to-right order = `DATAMEASUREINDEX`; totals row toggles with `ENABLETOTAL`; `double` DMs render with the configured decimal format. For a download filter: available measures = `&dataMeasure=`, pre-checked = `&DefaultDMs=` — assert with `dataMeasureOptionTexts` / `dataMeasureSelectedTexts` (**driven example:** Download ASN for SMI Suppliers). |
-| `e2sc-io` | **Download buttons**, the download-configurator dialog, `.xlsx` output | Workflow toolbar (the `BulkIoButtons` area) | Button presence via `DOWNLOAD_PSDSELECTOR` / `Download[DocTypes=…]`; configurator lists selectable columns; output file name = `<File type="output" fileName="…"/>`. **Already partly covered** by the Download PO cases (TC-A1/A4, TC-E1). |
+| `e2sc-io` | **Download buttons**, the download-configurator dialog, `.xlsx` output | Workflow toolbar (the `BulkIoButtons` area); the Job Status modal for the produced file | Button presence via `DOWNLOAD_PSDSELECTOR` / `Download[DocTypes=…]`; configurator lists selectable columns; output file name = `<File type="output" fileName="…"/>` (matches the Job List **File Name**, e.g. `shipmentBR.xlsx`), Document Type = the IoDocTypeDef name (e.g. `ShipmentBRExcelDownload`). **The produced file's own columns are now assertable** — see § *Downloading a file and asserting its contents* and `e3-download-shipment-excel.spec.ts`. Also partly covered by the Download PO cases (TC-A1/A4, TC-E1). |
 | `e2sc-cfg` | **Field labels, button labels, state names, formatted numbers/dates, validation messages** | Everywhere text is rendered | This is the **Rosetta Stone** — see the subsection below. Assert the visible string equals the AllBundles value. |
 | `alert-config` | Alert **filter UI** on search, **subscription checkboxes**, alert badges | Search page filter panel; **My Profile → Email Alert Subscription** | Filter PSD names (`OrderSearch_DOOrderAlertFilter_Buttons` / `_E2Admin`); subscription row label = `pc.web.alertSubscription.<NAME>.name`. |
 | `e2na-config` | Route **alias** in integration lists; scheduled downloads (mostly backend) | Integration/route config lists | Limited UI surface — assert the route `alias` string appears. Most verification here is backend (logs / produced files), not UI. |
@@ -421,6 +504,7 @@ Verified, actually-driven selectors so far:
 - **Order Type** (`PoRequestSchedule.PdfString19`) combobox — Search / Admin Search / Download PO flows.
 - **Download PO** flow (Menu → Downloads → Download Purchase Order).
 - **Download ASN for SMI Suppliers** data-measure filter — `#dataMeasure` combobox reached via Menu → Downloads → "Download ASN for SMI Suppliers" `.nth(1)` → **Next** (see `e2-download-asn-datameasure.spec.ts` + the `dataMeasure*` helpers).
+- **Download Shipment** flow, end to end including the produced file (Menu → Downloads → Shipment → Shipment → BOL criteria → *Search to Download* → *Next* → **Job Status** modal → `shipmentBR.xlsx`): `navigateToDownloadShipment`, `waitForDownloadJobLink`, `downloadShipmentWorkbook` + the `excel.ts` parsers (see `e3-download-shipment-excel.spec.ts`). Document Type `ShipmentBRExcelDownload`.
 - **PO Search form** (`procDiscreteOrderSearch`, dumped 2026-07-07 into `form-map-po-search.json` / `PO_SEARCH_FIELDS`): 6 autocomplete fields, 3 comboboxes, 2 date ranges, the Saved Searches `<select name="Filters">`, and the button ids (`#search`, `#reset_bt`, `#saveSearchNormalBt`, `#editSaveFilterBt`), plus the 10 verified `PO_SCHEDULE_STATES`. Hidden form state: `PSDSelector=DOBuySide`, `ModelSubType=DiscreteOrder`.
 - **Full application menu** — all 9 groups / ~90 items (`menu-map.json` / `MENU_MAP`, smoke-verified via `navigateToMenuItem`).
 
@@ -502,7 +586,7 @@ Guidance:
 
 **A full-suite run is NOT expected to be all-green.** The harness uses two different conventions for gaps, and you must recognise which you're looking at:
 
-### Convention 1 — RED known-defect tests (the dominant one, 4 tests)
+### Convention 1 — RED known-defect tests (the dominant one, 5 tests)
 
 A plain `test()` that **genuinely fails**, preceded by a `KNOWN DEFECT — SHOULD FAIL (RED)` comment naming the config remedy. The spec header comments spell this out explicitly ("a PLAIN test() that genuinely FAILS (RED) — a known-defect marker, **NOT** wrapped in `test.fail()`").
 
@@ -512,6 +596,7 @@ A plain `test()` that **genuinely fails**, preceded by a `KNOWN DEFECT — SHOUL
 | `TC-A2: Search dropdown includes "Planner Change Request"` | `a-ui-display.spec.ts` | only `SAP Order` + `PG Change Request` configured (2 of 3) |
 | `TC-A3: Summary dropdown shows Order Type values` | `a-ui-display.spec.ts` | same Summary-form gap |
 | `TC-F3: Order Type visible in Purchase Order Problem Summary (Exceptions)` | `f-readonly-display.spec.ts` | field absent from PO Problem Summary; required read-only |
+| `TC-E3-2: downloading yields a non-empty .xlsx …` | `e3-download-shipment-excel.spec.ts` | the **`ShipmentBRExcelDownload` job ends `Completed With Errors`** ~15-20s after being issued and `shipmentBR.xlsx` is never produced (3 runs, 2026-08-20) — so no file link appears. Server-side remedy: read the job's error file / `e2open/var/log/e2sc/e2sc.log` (`e2sc-logging`), then the IoDocTypeDef for that document type (`e2sc-io`). The **parsing** half of the test is verified independently and passes (`_excel-selftest.spec.ts`). |
 
 ### Convention 2 — `test.fail` (exactly 1 test)
 
@@ -533,7 +618,7 @@ Match the neighbouring spec's convention — RED + a `KNOWN DEFECT` comment is t
 
 Order Type IS present (with the 2 values) in the **Download Purchase Order** workflow (Menu → Downloads → Download Purchase Order), so the Download cases (TC-A1/A4, TC-E1) are implemented and pass. See `e2sc-ui_tests/README.md` and project memory `order-type-summary-history-gap`.
 
-> **`README.md` counts are stale.** It reports "23 passed, 13 skipped, 0 failed" and "five `test.fail` markers" — neither matches the code (1 `test.fail`, 12 `test.fixme`, 4 RED defects, 55 tests). The README's *findings* are still accurate; its *numbers* are not. Read the specs.
+> **`README.md` counts are stale.** It reports "23 passed, 13 skipped, 0 failed" and "five `test.fail` markers" — neither matches the code (1 `test.fail`, 14 `test.fixme`, 5 RED defects, 63 tests). The README's *findings* are still accurate; its *numbers* are not. Read the specs.
 
 > **Note / open discrepancy:** the History case is documented as a gap, but it was once observed **passing** (in the now-deleted `playwright-demo` harness). If you see it pass in `e2sc-ui_tests`, investigate whether the History form was reconfigured (and update these findings) rather than silently trusting either source.
 
@@ -569,11 +654,16 @@ When asked to work on MRP Type filters: fix navigation via `navigateToMenuItem` 
 | Locator never matches in-app content | You located on `page` instead of inside the `rcp_content` frame. Use `getRcpFrame`. |
 | Order Type values look wrong / empty | Don't scrape `body.textContent()`. Read the hidden `<select>` via `orderTypeOptionTexts`; for live selection read the panel checkboxes (`input:checked`), not the `<option selected>` attribute (default only). |
 | Download data measure is listed but **not checked by default** | Config gap, not a test bug: `&dataMeasure=` has the measure but `&DefaultDMs=` doesn't (or the `DefaultDMs` edit didn't deploy). `grep` both tokens on the server, fix `&DefaultDMs=`, reload workflows. See the `e2sc-rcp` guide. |
+| Download test times out `waiting for … getByRole('link', /\.xlsx$/)` | Two causes, both non-obvious. (1) The download is a **queued job** — the File Name is plain text until Status leaves `In Process`; poll with `waitForDownloadJobLink`. (2) Playwright's **default 30s test timeout** is shorter than the job — add `test.setTimeout(300000)`. See § *Downloading a file and asserting its contents*. |
+| A download link/dialog is never found | It's in the **`rcp_content_modal`** iframe, not `rcp_content`. Use `getRcpModalFrame(page)`. |
+| Job List shows the job stuck at `In Process` | Server-side generation problem, not a test bug — `waitForDownloadJobLink` reports the last Job List state. Check `/e2open/var/log/e2sc/e2sc.log` via the `e2sc-logging` skill. |
+| Parsed workbook has garbage headers / `No header row found` | Row 1 isn't the header — title/parameter rows sit above the grid. Use `findHeaderRow(ws, { mustContain })`, and `cellText` to normalise rich-text/formula/date cells. |
+| Saved download file is missing at parse time | Playwright deletes downloads when the context closes. Persist with `saveDownload(download, prefix)` first. |
 | Menu click hits the wrong workflow | Menu markup changed. `navigateToMenuItem` throws a "Menu drift" error naming the expected vs. found text — re-run the discovery spec (`$env:MENU_DISCOVERY="1"; npx playwright test _menu-discovery`) and update `MENU_MAP` in `helpers.ts` (raw dump: `menu-map.json`). |
 | `navigateToMenuItem` throws Unknown group/section/item | The error lists valid names — check the Menu Navigation Map table (mind the `Shipment (2)` disambiguation and exact punctuation, e.g. `Forecast / Inventory` vs `Forecast/Inventory (Buy Item)`). |
 | A field-visibility test fails | Verify the config is actually deployed/reloaded on the remote server (use the `e2sc-*` skills) before suspecting the test. It may be one of the documented RED known-defect tests. |
 | A run reports failures in `a-ui-display` / `f-readonly-display` | Expected. `TC-A1 Summary`, `TC-A2 Planner`, `TC-A3`, `TC-F3` are **RED known-defect tests** — plain `test()` by design, remedy is config. Don't "fix" them. See *Known-Defect Tests*. |
-| Pass/fail counts don't match `README.md` | The README's counts are stale (it predates the RED-defect convention). The specs are the authority: 55 tests, 1 `test.fail`, 12 `test.fixme`, 4 RED defects. |
+| Pass/fail counts don't match `README.md` | The README's counts are stale (it predates the RED-defect convention). The specs are the authority: 63 tests, 1 `test.fail`, 14 `test.fixme`, 5 RED defects. |
 | `z-mrp` Workflow-1 tests time out on navigation | Its local helper uses the wrong menu labels (`Forecast/Inventory`, `Create Shipment from Colab`). Use `navigateToMenuItem(page, 'Forecast / Inventory', 'Forecast / Inventory', 'Create Shipment From Collab')`. |
 | A `z-mrp` test passes but proves nothing | Several wrap the real assertion in `if (…)` and pass vacuously. Make it unconditional — see that spec's section. |
 | Need a selector you don't know | `npm run codegen` and record the interaction. |
