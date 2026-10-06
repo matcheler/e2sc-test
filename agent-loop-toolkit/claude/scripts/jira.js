@@ -8,6 +8,10 @@
 //   node jira.js edit-comment <KEY> <id> <file|->   replace the body of an existing comment
 //   node jira.js transitions <KEY>         list the transitions available now
 //   node jira.js transition <KEY> "<To Status>"   move the ticket to that status (e.g. "Fix Required", "Unit Test")
+//   node jira.js meta <PROJECT>            list the project's issue types and their required fields (run before create)
+//   node jira.js create <PROJECT> <spec.json|-> [--dry]   create an issue; prints its key. --dry (last argument) prints the payload and creates nothing.
+//       spec: {"summary","description","issuetype"(default "Task"),"parent"(KEY, for sub-tasks),"priority","labels":[],"components":[],"fields":{raw extra fields, e.g. a custom Epic Link}}
+//   node jira.js link <KEY> <OTHER-KEY> [type]   link two issues (default type "Relates"; KEY is the inward side, OTHER-KEY the outward)
 const fs = require("fs");
 const path = require("path");
 const os = require("os");
@@ -42,7 +46,7 @@ const json = async (m, u, b) => { const r = await call(m, u, b); return r.status
 const n = (x) => (x && (x.displayName || x.name || x.value)) || "-";
 
 const [cmd, key, arg] = process.argv.slice(2);
-if (!cmd || !key) die("usage: jira.js get|comment|transitions|transition <KEY> [arg]");
+if (!cmd || !key) die("usage: jira.js get|comment|edit-comment|transitions|transition|meta|create|link <KEY|PROJECT> [arg]");
 
 (async () => {
   if (cmd === "get") {
@@ -96,5 +100,32 @@ if (!cmd || !key) die("usage: jira.js get|comment|transitions|transition <KEY> [
     if (!t) die(`No transition to "${arg}" from the current status. Available: ${r.transitions.map((x) => `${x.name} -> ${x.to.name}`).join("; ")}`);
     await json("POST", `/rest/api/2/issue/${key}/transitions`, { transition: { id: t.id } });
     console.log(`${key}: ${t.name} -> ${t.to.name}`);
+  } else if (cmd === "meta") {
+    const r = await json("GET", `/rest/api/2/issue/createmeta?projectKeys=${encodeURIComponent(key)}&expand=projects.issuetypes.fields`);
+    const p = (r.projects || [])[0];
+    if (!p) die(`No create access to project ${key}, or it does not exist.`);
+    for (const t of p.issuetypes) {
+      const req = Object.entries(t.fields || {}).filter(([, v]) => v.required).map(([k, v]) => `${k} (${v.name})`);
+      console.log(`${t.name}${t.subtask ? " [sub-task]" : ""}: required = ${req.join(", ") || "-"}`);
+    }
+  } else if (cmd === "create") {
+    if (!arg) die("usage: jira.js create <PROJECT> <spec.json|-> [--dry]");
+    const spec = JSON.parse(arg === "-" ? fs.readFileSync(0, "utf8") : fs.readFileSync(arg, "utf8"));
+    if (!spec.summary) die("spec needs a summary");
+    const fields = { project: { key }, summary: spec.summary, issuetype: { name: spec.issuetype || "Task" } };
+    if (spec.description) fields.description = spec.description;
+    if (spec.priority) fields.priority = { name: spec.priority };
+    if (spec.labels) fields.labels = spec.labels;
+    if (spec.components) fields.components = spec.components.map((name) => ({ name }));
+    if (spec.parent) fields.parent = { key: spec.parent };
+    Object.assign(fields, spec.fields || {});
+    if (process.argv.includes("--dry")) { console.log(JSON.stringify({ fields }, null, 2)); return; }
+    const r = await json("POST", "/rest/api/2/issue", { fields });
+    console.log(r.key);
+  } else if (cmd === "link") {
+    const other = process.argv[4], type = process.argv[5] || "Relates";
+    if (!other) die("usage: jira.js link <KEY> <OTHER-KEY> [type]");
+    await json("POST", "/rest/api/2/issueLink", { type: { name: type }, inwardIssue: { key }, outwardIssue: { key: other } });
+    console.log(`${key} ${type} ${other}`);
   } else die(`unknown command ${cmd}`);
 })().catch((e) => die(String(e)));
