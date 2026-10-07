@@ -15,7 +15,8 @@ into an inbox, or commits.
 - Never ask for, echo or store passwords, cookies or keys in the chat, the repo or any `.loop` file.
 - When a secret is needed, give the engineer the command to save it to a file in their home folder
   and let them run it themselves:
-  - Jira: `~/.jira-cookie`
+  - Jira: `~/.jira-cookie` (written by `~/.claude/scripts/jira-login.js`; the engineer runs it and
+    types the password themselves)
   - test password: `~/.e2sc-password-<STACK>`
 
 ## 1. Check the kit is installed
@@ -119,7 +120,16 @@ so this takes 2 or 3 rounds. You need:
 
 ## 6. Check Jira access
 - **Cookie:** if `~/.jira-cookie` is missing, or `node ~/.claude/scripts/jira.js transitions <ticket>`
-  exits with JIRA_AUTH_EXPIRED, give the refresh steps:
+  exits with JIRA_AUTH_EXPIRED, give the refresh steps.
+  - **SSO login name:** ask the engineer for the name they sign in to Jira with (their Entra / SSO
+    login, usually in email form). This is not a secret, so asking in the chat is fine. First check
+    `~/.jira-sso-user`: if it exists, show it and ask whether it is still right.
+  - **Preferred:** tell them to run `node ~/.claude/scripts/jira-login.js --user <that login>` in their
+    own terminal, from this project (it needs `e2sc-ui_tests/node_modules`, so run it after the harness
+    exists). It prompts for the SSO password (hidden), signs in in a visible browser, and they type
+    the SMS code. The login name is remembered in `~/.jira-sso-user`, so later runs need no `--user`.
+    Never ask for the password in the chat or store it in a file.
+  - **Manual fallback:**
   1. Log in to Jira in the browser.
   2. Press F12, open Network, and reload the ticket.
   3. Click the ticket request and copy the **Cookie** request header value.

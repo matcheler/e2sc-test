@@ -51,6 +51,7 @@ It works through these steps:
 | `hooks\loop-ssh-guard.js` | Lets the loop agents SSH to the hosts in your `servers.md` without a prompt (only the implementer may scp outside the inbox), and makes every reload, populate, p2c or restart ask you |
 | `scripts\loop-verify.sh` | The gate: GREEN only if every locked test passes (no retries, no `test.fail`/`skip`/`only`). Prints a short failure digest, also saved as `last-verify-summary.txt` |
 | `scripts\jira.js` | Reads, comments on, edits comments on, transitions and creates (`meta`, `create`, `link`) Jira tickets through the SSO browser cookie (`~/.jira-cookie`) |
+| `scripts\jira-login.js` | Refreshes `~/.jira-cookie`: signs in through Entra in a visible browser (prompts for the SSO password, you type the SMS/MFA code), checks the cookie against Jira, then saves it. Needs Playwright (`e2sc-ui_tests/node_modules`). Run `node ~/.claude/scripts/jira-login.js --user <sso-login>` |
 | `loop\servers.md` | Per-project hosts and the shared-server rules (reloads, populate, restarts need a human) |
 | `loop\always-human.md` | Areas the loop never changes without a Jira approval. **Review it for your client.** |
 | `loop\harness-template\` | The Playwright harness `/setup-project` copies into a project |

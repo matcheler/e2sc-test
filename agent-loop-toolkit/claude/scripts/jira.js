@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Minimal Jira (Server/DC behind E2open SSO) client for the agent loop.
-// Auth: browser session cookie in %USERPROFILE%\.jira-cookie (copy the Cookie request header from DevTools).
+// Auth: browser session cookie in %USERPROFILE%\.jira-cookie. Refresh it with `node ~/.claude/scripts/jira-login.js`
+// (Entra sign-in in a visible browser) or copy the Cookie request header from DevTools.
 //
 // Usage:
 //   node jira.js get <KEY> [outDir]        print ticket (summary, description, comments, links); download attachments to outDir
@@ -22,7 +23,7 @@ const COOKIE_FILE = process.env.JIRA_COOKIE_FILE || path.join(os.homedir(), ".ji
 function die(msg, code = 1) { process.stderr.write(msg + "\n"); process.exit(code); }
 
 let cookie;
-try { cookie = fs.readFileSync(COOKIE_FILE, "utf8").trim(); } catch { die(`No Jira cookie at ${COOKIE_FILE}. Copy the Cookie request header from DevTools and run: Get-Clipboard | Set-Content -NoNewline "$HOME\\.jira-cookie"`); }
+try { cookie = fs.readFileSync(COOKIE_FILE, "utf8").trim(); } catch { die(`No Jira cookie at ${COOKIE_FILE}. Run \`node ~/.claude/scripts/jira-login.js\` (password + SMS code in a browser window), or copy the Cookie request header from DevTools and run: Get-Clipboard | Set-Content -NoNewline "$HOME\\.jira-cookie"`); }
 
 async function call(method, url, body) {
   const res = await fetch(url.startsWith("http") ? url : BASE + url, {
@@ -37,7 +38,7 @@ async function call(method, url, body) {
     body: body ? JSON.stringify(body) : undefined,
   });
   if (res.status === 302 || res.status === 401 || (res.headers.get("content-type") || "").includes("text/html")) {
-    die("JIRA_AUTH_EXPIRED: the SSO session cookie is no longer valid. Ask the user to refresh ~/.jira-cookie.", 3);
+    die("JIRA_AUTH_EXPIRED: the SSO session cookie is no longer valid. Ask the user to refresh ~/.jira-cookie: run `node ~/.claude/scripts/jira-login.js` (password + SMS code in a browser window), or copy the Cookie header from DevTools.", 3);
   }
   if (!res.ok) die(`Jira ${method} ${url} failed: HTTP ${res.status}\n${(await res.text()).slice(0, 1000)}`);
   return res;
