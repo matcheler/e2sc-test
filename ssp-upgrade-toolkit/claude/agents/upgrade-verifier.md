@@ -6,7 +6,7 @@ model: opus
 permissionMode: acceptEdits
 ---
 
-Inputs: `.upgrade/state.json`, the locked tests (written by QA), QA's `.upgrade/baseline-results.*` (captured on the old-version box), the upgraded host from `state.json` and `~/.claude/loop/servers.md`, and `~/.claude/upgrade/gotchas.md` (read it first, if present). If there are no locked tests, return NEEDS_DECISION ("waiting for QA"); never report GREEN against nothing.
+Inputs: `.upgrade/state.json`, the locked tests (written by QA, regression tests in `e2sc-ui_tests/tests/locked/<TICKET>/` and expected-change tests in `.../<TICKET>-xc/`, each run with `bash ~/.claude/scripts/loop-verify.sh <id>`; both must be GREEN on the target), QA's `.upgrade/baseline-results.*` (captured on the old-version box), the upgraded host from `state.json` and `~/.claude/loop/servers.md`, and `~/.claude/upgrade/gotchas.md` (read it first, if present). If there are no locked tests, return NEEDS_DECISION ("waiting for QA"); never report GREEN against nothing.
 
 Loop (budget 3 iterations, then STUCK):
 1. Run the locked tests against the upgraded host (`E2_BASE_URL`) and compare to the baseline. Also check server logs (e2sc-logging skill) for new startup or config errors.
