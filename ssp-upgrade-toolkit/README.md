@@ -17,6 +17,18 @@ Flow: preflight (versions, SVN rollback point, target box, QA old-version box) -
 
 Every subagent ends with DONE, NEEDS_DECISION, NEEDS_SERVER_ACTION or STUCK. Assessor, merger and verifier read `~/.claude/upgrade/gotchas.md` first.
 
+## Phases
+| # | Phase | Owner | What happens | Output | Stop |
+|---|-------|-------|--------------|--------|------|
+| 0 | Preflight | Engineer | Check the project is in `servers.md`, `svn status` is clean, record the rollback revision. Confirm current/target/base SSP versions, the target box, the QA old-version box, deploy authorisation, Jira project, names. Check SSH to both boxes. | `state.json` | Any answer fails validation |
+| 1 | First deployment | Engineer | You update `comp_dependencies` and rootpom `ssp.version`; the agent verifies they match the target. `setup remove` then `setup` on the target box. Extract old/new platform trees from the dist zips. Re-seed data, run the smoke check. | Deployed box, `platform-old/`, `platform-new/` | A deploy step fails |
+| 2 | Assessment and tickets | Engineer | One `upgrade-assessor` per component ranks every customisation HIGH/MEDIUM/LOW against the platform delta and drafts Jira tickets. Approved drafts become tickets. QA gets a brief and starts drafting cases and the baseline on the old box. | `assessment.md`, `assessment.json`, `jiras.md`, tickets | **Gate A** |
+| 3 | Capture conflicts | Engineer | Run any extra p2c/reload/restart steps. Collect the conflicts the deployment reported, tag each with risk and ticket. Cross-check every HIGH assessment item is listed or marked "no action". | `conflicts.md` | **Gate C** |
+| 4 | Resolve | Engineer | `upgrade-merger` resolves each conflict (`*.replace` starts from the new platform file and re-applies the customer delta). Redeploy with plain `setup`, re-capture, smoke check. Up to 3 rounds, within the 5-redeploy cap. | `merge-log.md`, updated `conflicts.md` | Unresolved HIGH conflict |
+| 5 | Test definition | QA | QA finalises the cases (expected platform changes marked, `test.fail` markers kept), then the tests are written and locked. Tests are host-agnostic so the same suite runs on the old box (baseline) and the target box. | Approved cases, locked tests, `baseline-results.*` | **Gate B**; no locked tests = waiting for QA |
+| 6 | Verify and fix | Engineer | `upgrade-verifier` runs the locked tests against the baseline, reads server logs, classifies failures and fixes product/config/merge issues (max 3 iterations). Server actions come back as NEEDS_SERVER_ACTION. Then `reviewer` checks the work against the assessment. | `iterations.md`, `handover.md`, review | STUCK, or review findings |
+| 7 | Report | Engineer | Summarise versions, files by overlay type, conflicts auto vs human resolved, results vs baseline, open issues, server actions, redeploy count, rollback revision. Append new gotchas. | `report.md`, `gotchas.md` | Ready for manual SVN check-in |
+
 ## Safety
 - You are asked at preflight whether agents may run `setup remove` / `setup` on the dedicated upgrade box (never the QA old-version box). `setup remove` is used for the first deployment only. Reloads, p2c, restarts and inbox drops always stay with you.
 - Locked tests are never edited to pass.
