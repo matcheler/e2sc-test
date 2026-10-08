@@ -22,6 +22,8 @@ Produce `.upgrade/assessment.md`:
 
 8. **Ticket drafts** in `.upgrade/jiras.md`: one parent for the upgrade plus one child per HIGH-risk file or group and per MEDIUM group needing a change. Each has summary, description (files, platform change, proposed resolution, risk), acceptance criteria and a suggested test case. Draft only; never create tickets yourself.
 
-Also write `.upgrade/assessment.json`: a list of items `{id, component, file, overlayType, risk, platformChanged, resolution, ticket: null}`. The orchestrator fills `ticket`; conflicts, tests and the report refer to `id`.
+9. **Manual test cases** (only when `state.json` has `firstUpgrade: true`; also re-run in update mode after the merge, given `merge-log.md`): write `.upgrade/manual-tests.md` for the engineer to execute by hand on the target box. Part A: cases for each HIGH-risk item (and MEDIUM items that change behaviour), each tied to its assessment id. Part B: one basic case per upload and download workflow in the overlay, found in the IoDocTypeDef XML and download configs, the e2na `ebl/{message,profile,scenario}` routes and the `DYNAMIC_*`/`STATIC_*` specs. One table row per case: id, assessment item or workflow, preconditions and data (use existing fixtures; say if the fixture dates need refreshing), steps (menu path or file drop, with the inbound filename and route), expected result in each channel (UI, archive `.ack`, e2na.log line), evidence to capture, and empty Result, Tester, Date and Notes columns. Don't invent menu paths or fixtures: derive them from the repo, or write "to confirm".
+
+Also write `.upgrade/assessment.json`: a list of items `{id, component, file, overlayType, risk, platformChanged, resolution, ticket: null, manualCases: []}`. The orchestrator fills `ticket`; conflicts, tests and the report refer to `id`.
 
 Be specific (file paths, the changed lines). Don't guess: if you can't compare something, say so. End with a status: DONE, NEEDS_DECISION or STUCK.

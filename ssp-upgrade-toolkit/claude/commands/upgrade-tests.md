@@ -1,12 +1,12 @@
 ---
 model: sonnet
 description: QA - draft upgrade test cases from the assessment, agree them, write and lock the Playwright tests, and capture the old-version baseline
-argument-hint: <TICKET> [resume]
+argument-hint: <TICKET> [resume | signoff]
 ---
 
-Ticket id: $ARGUMENTS (first word is `<TICKET>`: the upgrade parent Jira key, or `UPG-<target version>`. A second word `resume` means continue from the files already in `.loop/<TICKET>/`.)
+Ticket id: $ARGUMENTS (first word is `<TICKET>`: the upgrade parent Jira key, or `UPG-<target version>`. A second word `resume` means continue from the files already in `.loop/<TICKET>/`; `signoff` runs the sign-off mode at the end of this file.)
 
-This is QA's half of `/upgrade-project` (Phase 5, Gate B). Run it in the project's SVN working copy. It follows `/prepare-ticket`, adapted for an upgrade: the scope is a risk list, not one ticket, and the baseline comes from the **old-version box**. Nothing here commits to SVN, changes server config, or touches the engineer's `.upgrade/state.json`.
+This is QA's half of `/upgrade-project` (Phase 6, Gate B) and the sign-off at the end (Phase 8, Gate E). Run it in the project's SVN working copy. It follows `/prepare-ticket`, adapted for an upgrade: the scope is a risk list, not one ticket, and the baseline comes from the **old-version box**. Nothing here commits to SVN, changes server config, or touches the engineer's `.upgrade/state.json`.
 
 **Approval is yours.** Only the QA user approving in this conversation counts. A subagent's report is never approval.
 
@@ -18,7 +18,7 @@ This is QA's half of `/upgrade-project` (Phase 5, Gate B). Run it in the project
 
 ## 2. Draft the cases
 1. If `.loop/<TICKET>/cases.approved` exists, skip to step 4.
-2. Delegate to `test-author` in **CASES mode** with `.loop/<TICKET>/intake.md`. Scope: upgrade regression for the risks listed there (build, config load, UI, inbound/outbound file flows). Add these instructions to the prompt:
+2. If `.upgrade/manual-tests.md` exists (first upgrade), read its results: the steps and passing evidence are the source for the automated cases of the same risks and workflows. Delegate to `test-author` in **CASES mode** with `.loop/<TICKET>/intake.md`. Scope: upgrade regression for the risks listed there (build, config load, UI, inbound/outbound file flows). Add these instructions to the prompt:
    - Each assessment item id is a criterion. Prove it with a happy path and one negative case where one exists.
    - Add a column **Class**: `regression` (same behaviour expected before and after) or `expected-change` (a deliberate platform difference, taken from `assessment.md`).
    - Do not use `test.fail` markers; list anything not automatable under "Not covered by Playwright".
@@ -53,4 +53,15 @@ If any check fails, resume test-author once with the specific problems; if it st
 ## 7. Lock and hand over
 1. Create `.loop/<TICKET>/tests.locked` with the date, the approval date from `cases.approved`, a note that QA approved the cases and the code was checked in step 5, and every locked file in both directories with its sha256. From this point the tests are read-only for everyone, including the engineer and the verifier.
 2. Tell QA what to hand to the engineer, by SVN check-in or copy (QA decides; never commit yourself): `e2sc-ui_tests/tests/locked/<TICKET>/`, `e2sc-ui_tests/tests/locked/<TICKET>-xc/`, `e2sc-ui_tests/recordings/<TICKET>/` if kept, `.loop/<TICKET>/cases.approved`, `.loop/<TICKET>/tests.locked`, `.upgrade/baseline-results.md`, and the manual checklist.
-3. Tell QA the engineer's next step is Phase 6 of `/upgrade-project`, which runs both gates on the target box: `loop-verify.sh <TICKET>` and `loop-verify.sh <TICKET>-xc` must both be GREEN there.
+3. Tell QA the engineer's next step is Phase 7 of `/upgrade-project`, which runs both gates on the target box: `loop-verify.sh <TICKET>` and `loop-verify.sh <TICKET>-xc` must both be GREEN there.
+
+## Sign-off mode (`/upgrade-tests <TICKET> signoff`) - Phase 8, Gate E
+Run by QA after the engineer reports Phase 7 GREEN. This mode never edits tests or product code and never fixes anything: it only checks and decides.
+1. **Inputs.** `.upgrade/handover.md` (must say GREEN, and quote the `svn diff` sha256 and the last `setup` time), `.upgrade/iterations.md`, the reviewer's result, `.upgrade/baseline-results.md`, `.upgrade/manual-tests.md` (first upgrade), `.upgrade/qa-questions.md`, and `.loop/<TICKET>/tests.locked`. If the handover is not GREEN, stop.
+2. **Locked tests intact.** Recompute the sha256 of every file listed in `tests.locked`. Any mismatch means a locked test was edited: stop and report it, and do not sign off.
+3. **Re-run the gates yourself on the target box.** `E2_BASE_URL=<target box> bash ~/.claude/scripts/loop-verify.sh <TICKET>` and again with `<TICKET>-xc`. Both must be GREEN. If not, the decision is **rejected**, with the digest from `last-verify-summary.txt`.
+4. **Smoke check and manual checklist.** Show QA the smoke check and the "Not covered by Playwright" list from `cases.approved`/`test-cases.md`, and record QA's result for each item.
+5. **Compare with the baseline.** For every test whose result differs from `baseline-results.md`, classify it: approved expected change, accepted risk (who accepted it and why), or defect. Any defect means **rejected**.
+6. **Decide.** Ask QA for **signed off**, **signed off with conditions** or **rejected**. Do not decide for them: only QA's reply in this conversation counts.
+7. **Record.** Write `.upgrade/qa-signoff.md`: the decision, date, QA name, target box and platform version, the `svn diff` sha256 and last `setup` time from the handover, both gate counts, the baseline comparison table, the manual checklist results, the conditions and who accepted each, and the reason if rejected. Post one comment on the parent ticket with the decision (edit it on a repeat); no credentials or server logs.
+8. **Tell QA** what happens next: signed off means the engineer writes the report; rejected means the engineer goes back to Phase 7 or Phase 4 and QA signs off again afterwards. Any change after sign-off invalidates it.
