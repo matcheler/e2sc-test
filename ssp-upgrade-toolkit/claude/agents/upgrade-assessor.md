@@ -18,7 +18,7 @@ Produce `.upgrade/assessment.md`:
 4. **Build and dependency changes**: pom/comp_dependencies diffs, Java version, new or removed modules.
 5. **Platform release/migration notes** found in the new drop, and anything needing DB/schema or server-side migration.
 6. **Proposed merge strategy per file type**, and the files needing a human decision.
-7. **Test focus**: which behaviours the risks threaten (this feeds QA's test cases).
+7. **Test focus**: which behaviours the risks threaten (this feeds the unit test cases and QA's regression planning).
 
 8. **Ticket drafts** in `.upgrade/jiras.md`: one parent for the upgrade plus one child per HIGH-risk file or group and per MEDIUM group needing a change. Each has summary, description (files, platform change, proposed resolution, risk), acceptance criteria and a suggested test case. Draft only; never create tickets yourself.
 
