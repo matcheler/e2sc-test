@@ -1,0 +1,208 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2060 1850" width="2060" height="1850">
+<defs>
+<marker id="aN" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#12263a"/></marker>
+<marker id="aR" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#c0392b"/></marker>
+<marker id="aA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#e8a33d"/></marker>
+<marker id="aT" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0f766e"/></marker>
+</defs>
+<rect width="2060" height="1850" fill="#ffffff"/>
+<text x="40" y="62" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="46" font-weight="bold" fill="#12263a" text-anchor="start"><tspan>SSP upgrade agents</tspan></text>
+<text x="40" y="94" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="16" font-weight="normal" fill="#6b7280" text-anchor="start"><tspan font-family="Consolas, 'Courier New', monospace" font-size="15">/upgrade-project</tspan><tspan> is the orchestrator (main session): it holds </tspan><tspan font-family="Consolas, 'Courier New', monospace" font-size="15">state.json</tspan><tspan>, stops at the gates and runs the authorised </tspan><tspan font-family="Consolas, 'Courier New', monospace" font-size="15">setup</tspan><tspan> commands. Phases 5-7 can run on their own with </tspan><tspan font-family="Consolas, 'Courier New', monospace" font-size="15">/upgrade-validate</tspan><tspan>.</tspan></text>
+<line x1="40" y1="112" x2="2020" y2="112" stroke="#d9dee4" stroke-width="1.5"/>
+<path d="M70,202 V190 H1990 V202" fill="none" stroke="#0f766e" stroke-width="2.2"/>
+<text x="1030" y="176" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="24" font-weight="bold" fill="#0f766e" text-anchor="middle"><tspan font-family="Consolas, 'Courier New', monospace" font-size="23">/upgrade-project</tspan><tspan>  Phases 0-4: assess, deploy, resolve</tspan></text>
+<rect x="70" y="250" width="270" height="240" rx="14" fill="#fff" stroke="#6b7280" stroke-width="2.2"/>
+<text x="86" y="284" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="21" font-weight="bold" fill="#12263a" text-anchor="start"><tspan>Preflight</tspan></text>
+<text x="86" y="306" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="13" font-weight="normal" fill="#6b7280" text-anchor="start"><tspan>Phase 0 · main session</tspan></text>
+<text x="86" y="344" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#0f766e" text-anchor="start"><tspan>READS</tspan></text>
+<text x="86" y="364" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">svn status</tspan><tspan>, </tspan><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">pom.xml</tspan></text>
+<text x="86" y="384" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">servers.md</tspan></text>
+<text x="86" y="408" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#0f766e" text-anchor="start"><tspan>ASKS YOU</tspan></text>
+<text x="86" y="428" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>versions, target box, dist zips</tspan></text>
+<text x="86" y="452" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#0f766e" text-anchor="start"><tspan>WRITES</tspan></text>
+<text x="86" y="472" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">state.json</tspan><tspan>, rollback revision</tspan></text>
+<rect x="400" y="250" width="270" height="240" rx="10" fill="#fff" stroke="#12263a" stroke-width="2.6"/>
+<text x="416" y="284" font-family="Consolas, 'Courier New', monospace" font-size="21" font-weight="bold" fill="#12263a" text-anchor="start"><tspan>upgrade-assessor</tspan></text>
+<text x="416" y="306" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="13" font-weight="normal" fill="#6b7280" text-anchor="start"><tspan>Phase 1 · one per component</tspan></text>
+<text x="416" y="344" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#0f766e" text-anchor="start"><tspan>READS</tspan></text>
+<text x="416" y="364" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">platform-old/</tspan><tspan> and </tspan><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">platform-new/</tspan></text>
+<text x="416" y="384" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>overlay working copy</tspan></text>
+<text x="416" y="404" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">gotchas.md</tspan></text>
+<text x="416" y="428" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#0f766e" text-anchor="start"><tspan>WRITES</tspan></text>
+<text x="416" y="448" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">assessment.md</tspan><tspan> / </tspan><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">.json</tspan></text>
+<text x="416" y="468" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">jiras.md</tspan><tspan>, </tspan><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">unit-tests.md</tspan></text>
+<rect x="730" y="250" width="270" height="240" rx="10" fill="#fdebc8" stroke="#e8a33d" stroke-width="2.6"/>
+<text x="746" y="284" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="21" font-weight="bold" fill="#9a5b00" text-anchor="start"><tspan>You</tspan></text>
+<text x="746" y="306" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="13" font-weight="normal" fill="#6b7280" text-anchor="start"><tspan>Gate A</tspan></text>
+<text x="746" y="341" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#4a3200" text-anchor="start"><tspan>approve the risk list</tspan></text>
+<text x="746" y="362" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#4a3200" text-anchor="start"><tspan>and the Jira tickets</tspan></text>
+<text x="746" y="383" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#4a3200" text-anchor="start"></text>
+<text x="746" y="404" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#4a3200" text-anchor="start"><tspan>tickets are created</tspan></text>
+<text x="746" y="425" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#4a3200" text-anchor="start"><tspan>with </tspan><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">jira.js</tspan></text>
+<rect x="1060" y="250" width="270" height="240" rx="14" fill="#fff" stroke="#6b7280" stroke-width="2.2"/>
+<text x="1076" y="284" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="21" font-weight="bold" fill="#12263a" text-anchor="start"><tspan>Deploy + capture</tspan></text>
+<text x="1076" y="306" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="13" font-weight="normal" fill="#6b7280" text-anchor="start"><tspan>Phases 2-3 · main session</tspan></text>
+<text x="1076" y="341" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>you update </tspan><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">comp_dependencies</tspan></text>
+<text x="1076" y="362" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">setup remove</tspan><tspan> + </tspan><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">setup</tspan><tspan> on</tspan></text>
+<text x="1076" y="383" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>the target box</tspan></text>
+<text x="1076" y="404" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"></text>
+<text x="1076" y="425" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>captures </tspan><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">conflicts.md</tspan></text>
+<rect x="1390" y="250" width="270" height="240" rx="10" fill="#fdebc8" stroke="#e8a33d" stroke-width="2.6"/>
+<text x="1406" y="284" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="21" font-weight="bold" fill="#9a5b00" text-anchor="start"><tspan>You</tspan></text>
+<text x="1406" y="306" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="13" font-weight="normal" fill="#6b7280" text-anchor="start"><tspan>Gate B</tspan></text>
+<text x="1406" y="341" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#4a3200" text-anchor="start"><tspan>approve the conflict list</tspan></text>
+<text x="1406" y="362" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#4a3200" text-anchor="start"><tspan>(HIGH items cross-checked</tspan></text>
+<text x="1406" y="383" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#4a3200" text-anchor="start"><tspan>against the assessment)</tspan></text>
+<rect x="1720" y="250" width="270" height="240" rx="10" fill="#fff" stroke="#12263a" stroke-width="2.6"/>
+<text x="1736" y="284" font-family="Consolas, 'Courier New', monospace" font-size="21" font-weight="bold" fill="#12263a" text-anchor="start"><tspan>upgrade-merger</tspan></text>
+<text x="1736" y="306" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="13" font-weight="normal" fill="#6b7280" text-anchor="start"><tspan>Phase 4</tspan></text>
+<text x="1736" y="344" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#0f766e" text-anchor="start"><tspan>READS</tspan></text>
+<text x="1736" y="364" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">conflicts.md</tspan></text>
+<text x="1736" y="384" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>old + new platform, overlay</tspan></text>
+<text x="1736" y="408" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#0f766e" text-anchor="start"><tspan>CHANGES</tspan></text>
+<text x="1736" y="428" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>overlay via </tspan><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">e2sc-*</tspan><tspan> skills</tspan></text>
+<text x="1736" y="452" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#0f766e" text-anchor="start"><tspan>WRITES</tspan></text>
+<text x="1736" y="472" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">merge-log.md</tspan></text>
+<path d="M340,370 L400,370" fill="none" stroke="#12263a" stroke-width="2.4" marker-end="url(#aN)"/>
+<path d="M670,370 L730,370" fill="none" stroke="#12263a" stroke-width="2.4" marker-end="url(#aN)"/>
+<path d="M1000,370 L1060,370" fill="none" stroke="#12263a" stroke-width="2.4" marker-end="url(#aN)"/>
+<path d="M1330,370 L1390,370" fill="none" stroke="#12263a" stroke-width="2.4" marker-end="url(#aN)"/>
+<path d="M1660,370 L1720,370" fill="none" stroke="#12263a" stroke-width="2.4" marker-end="url(#aN)"/>
+<text x="370" y="362" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="11" font-weight="normal" fill="#12263a" text-anchor="start"></text>
+<path d="M1935,250 L1935,220 L1775,220 L1775,250" fill="none" stroke="#12263a" stroke-width="2.4" marker-end="url(#aN)"/>
+<text x="1855" y="212" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#12263a" text-anchor="middle"><tspan>redeploy </tspan><tspan font-family="Consolas, 'Courier New', monospace" font-size="11">setup</tspan><tspan> → re-capture, max 3</tspan></text>
+<rect x="1390" y="530" width="270" height="104" rx="10" fill="#f8e1dd" stroke="#c0392b" stroke-width="2.4" stroke-dasharray="8 6"/>
+<text x="1406" y="564" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="21" font-weight="bold" fill="#c0392b" text-anchor="start"><tspan>Stops</tspan></text>
+<text x="1406" y="599" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>unresolved HIGH conflict</tspan></text>
+<text x="1406" y="620" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>→ you decide</tspan></text>
+<path d="M1790,490 L1790,572 L1660,572" fill="none" stroke="#c0392b" stroke-width="2.4" stroke-dasharray="8 6" marker-end="url(#aR)"/>
+<path d="M70,717 V705 H1990 V717" fill="none" stroke="#0f766e" stroke-width="2.2"/>
+<text x="1030" y="691" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="24" font-weight="bold" fill="#0f766e" text-anchor="middle"><tspan font-family="Consolas, 'Courier New', monospace" font-size="23">/upgrade-validate</tspan><tspan>  Phases 5-7: unit tests, verify, report</tspan></text>
+<rect x="1720" y="790" width="270" height="240" rx="10" fill="#fdebc8" stroke="#e8a33d" stroke-width="2.6"/>
+<text x="1736" y="824" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="21" font-weight="bold" fill="#9a5b00" text-anchor="start"><tspan>You</tspan></text>
+<text x="1736" y="846" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="13" font-weight="normal" fill="#6b7280" text-anchor="start"><tspan>Gate C</tspan></text>
+<text x="1736" y="881" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#4a3200" text-anchor="start"><tspan>approve the unit-test cases</tspan></text>
+<text x="1736" y="902" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#4a3200" text-anchor="start"><tspan>(assessor updated them with</tspan></text>
+<text x="1736" y="923" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#4a3200" text-anchor="start"><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">merge-log.md</tspan><tspan>)</tspan></text>
+<text x="1736" y="944" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#4a3200" text-anchor="start"></text>
+<text x="1736" y="965" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#4a3200" text-anchor="start"><tspan>set what tests may do:</tspan></text>
+<text x="1736" y="986" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#4a3200" text-anchor="start"><tspan>file drops, log reads</tspan></text>
+<rect x="1390" y="790" width="270" height="240" rx="10" fill="#fff" stroke="#12263a" stroke-width="2.6"/>
+<text x="1406" y="824" font-family="Consolas, 'Courier New', monospace" font-size="21" font-weight="bold" fill="#12263a" text-anchor="start"><tspan>test-author</tspan></text>
+<text x="1406" y="846" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="13" font-weight="normal" fill="#6b7280" text-anchor="start"><tspan>Phase 5 · TESTS mode</tspan></text>
+<text x="1406" y="884" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#0f766e" text-anchor="start"><tspan>READS</tspan></text>
+<text x="1406" y="904" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">cases.approved</tspan></text>
+<text x="1406" y="924" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">recordings/&lt;TICKET&gt;-unit/</tspan></text>
+<text x="1406" y="948" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#0f766e" text-anchor="start"><tspan>WRITES</tspan></text>
+<text x="1406" y="968" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">tests/locked/&lt;TICKET&gt;-unit/</tspan></text>
+<rect x="1060" y="790" width="270" height="240" rx="14" fill="#fff" stroke="#6b7280" stroke-width="2.2"/>
+<text x="1076" y="824" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="21" font-weight="bold" fill="#12263a" text-anchor="start"><tspan>Check, lock</tspan></text>
+<text x="1076" y="846" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="13" font-weight="normal" fill="#6b7280" text-anchor="start"><tspan>Phase 5 · main session</tspan></text>
+<text x="1076" y="881" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">loop-verify.sh &lt;TICKET&gt;-unit</tspan></text>
+<text x="1076" y="902" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>must be GREEN on the target</tspan></text>
+<text x="1076" y="923" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"></text>
+<text x="1076" y="944" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">tests.locked</tspan><tspan> (sha256)</tspan></text>
+<text x="1076" y="965" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"></text>
+<text x="1076" y="986" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>product failure → merger</tspan></text>
+<rect x="730" y="790" width="270" height="240" rx="10" fill="#fff" stroke="#12263a" stroke-width="2.6"/>
+<text x="746" y="824" font-family="Consolas, 'Courier New', monospace" font-size="21" font-weight="bold" fill="#12263a" text-anchor="start"><tspan>upgrade-verifier</tspan></text>
+<text x="746" y="846" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="13" font-weight="normal" fill="#6b7280" text-anchor="start"><tspan>Phase 6</tspan></text>
+<text x="746" y="884" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#0f766e" text-anchor="start"><tspan>READS</tspan></text>
+<text x="746" y="904" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>locked unit tests, e2sc logs</tspan></text>
+<text x="746" y="924" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>open Jira defects</tspan></text>
+<text x="746" y="948" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#0f766e" text-anchor="start"><tspan>CHANGES</tspan></text>
+<text x="746" y="968" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>config via </tspan><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">e2sc-*</tspan><tspan> skills</tspan></text>
+<text x="746" y="992" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#0f766e" text-anchor="start"><tspan>WRITES</tspan></text>
+<text x="746" y="1012" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">iterations.md</tspan><tspan>, </tspan><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">handover.md</tspan></text>
+<rect x="400" y="790" width="270" height="240" rx="10" fill="#fff" stroke="#12263a" stroke-width="2.6"/>
+<text x="416" y="824" font-family="Consolas, 'Courier New', monospace" font-size="21" font-weight="bold" fill="#12263a" text-anchor="start"><tspan>reviewer</tspan></text>
+<text x="416" y="846" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="13" font-weight="normal" fill="#6b7280" text-anchor="start"><tspan>Phase 6</tspan></text>
+<text x="416" y="884" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#0f766e" text-anchor="start"><tspan>READS</tspan></text>
+<text x="416" y="904" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>assessment + Jira tickets</tspan></text>
+<text x="416" y="924" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">svn diff</tspan></text>
+<text x="416" y="948" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#0f766e" text-anchor="start"><tspan>WRITES</tspan></text>
+<text x="416" y="968" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">review.md</tspan></text>
+<text x="416" y="988" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>APPROVE / NOTES / BLOCK</tspan></text>
+<rect x="70" y="790" width="270" height="240" rx="14" fill="#fff" stroke="#6b7280" stroke-width="2.2"/>
+<text x="86" y="824" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="21" font-weight="bold" fill="#12263a" text-anchor="start"><tspan>Report</tspan></text>
+<text x="86" y="846" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="13" font-weight="normal" fill="#6b7280" text-anchor="start"><tspan>Phase 7 · main session</tspan></text>
+<text x="86" y="881" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>writes </tspan><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">report.md</tspan></text>
+<text x="86" y="902" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"></text>
+<text x="86" y="923" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>unit results, conflicts,</tspan></text>
+<text x="86" y="944" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>open issues, server actions</tspan></text>
+<text x="86" y="965" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"></text>
+<text x="86" y="986" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>appends to </tspan><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">gotchas.md</tspan></text>
+<path d="M1720,910 L1660,910" fill="none" stroke="#12263a" stroke-width="2.4" marker-end="url(#aN)"/>
+<path d="M1390,910 L1330,910" fill="none" stroke="#12263a" stroke-width="2.4" marker-end="url(#aN)"/>
+<path d="M1060,910 L1000,910" fill="none" stroke="#12263a" stroke-width="2.4" marker-end="url(#aN)"/>
+<path d="M730,910 L670,910" fill="none" stroke="#12263a" stroke-width="2.4" marker-end="url(#aN)"/>
+<path d="M400,910 L340,910" fill="none" stroke="#12263a" stroke-width="2.4" marker-end="url(#aN)"/>
+<text x="700" y="894" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="11" font-weight="bold" fill="#0f766e" text-anchor="middle"><tspan>GREEN</tspan></text>
+<text x="370" y="894" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="11" font-weight="bold" fill="#0f766e" text-anchor="middle"><tspan>APPROVE</tspan></text>
+<rect x="1390" y="1070" width="270" height="104" rx="10" fill="#fdebc8" stroke="#e8a33d" stroke-width="2.6"/>
+<text x="1406" y="1104" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="21" font-weight="bold" fill="#9a5b00" text-anchor="start"><tspan>You record flows</tspan></text>
+<text x="1406" y="1139" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#4a3200" text-anchor="start"><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">playwright codegen</tspan></text>
+<text x="1406" y="1160" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#4a3200" text-anchor="start"><tspan>only for approved cases</tspan></text>
+<path d="M1460,1030 L1460,1070" fill="none" stroke="#e8a33d" stroke-width="2.4" marker-end="url(#aA)"/>
+<path d="M1590,1070 L1590,1030" fill="none" stroke="#e8a33d" stroke-width="2.4" marker-end="url(#aA)"/>
+<text x="1446" y="1056" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#9a5b00" text-anchor="end"><tspan>needs recording</tspan></text>
+<text x="1598" y="1056" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#9a5b00" text-anchor="start"><tspan>resume</tspan></text>
+<path d="M945,790 L945,760 L785,760 L785,790" fill="none" stroke="#12263a" stroke-width="2.4" marker-end="url(#aN)"/>
+<text x="865" y="752" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#12263a" text-anchor="middle"><tspan>fail → fix → verify (max 3)</tspan></text>
+<rect x="730" y="1070" width="270" height="104" rx="10" fill="#f8e1dd" stroke="#c0392b" stroke-width="2.4" stroke-dasharray="8 6"/>
+<text x="746" y="1104" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="21" font-weight="bold" fill="#c0392b" text-anchor="start"><tspan>Escalated</tspan></text>
+<text x="746" y="1139" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">handover.md</tspan><tspan> → you decide</tspan></text>
+<text x="746" y="1160" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>redeploys need your say</tspan></text>
+<path d="M800,1030 L800,1070" fill="none" stroke="#c0392b" stroke-width="2.4" stroke-dasharray="8 6" marker-end="url(#aR)"/>
+<text x="786" y="1056" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#c0392b" text-anchor="end"><tspan>STUCK</tspan></text>
+<path d="M500,1030 L500,1135 L730,1135" fill="none" stroke="#c0392b" stroke-width="2.4" stroke-dasharray="8 6" marker-end="url(#aR)"/>
+<text x="492" y="1056" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#c0392b" text-anchor="end"><tspan>BLOCK</tspan></text>
+<path d="M1990,370 L2030,370 L2030,910 L1992,910" fill="none" stroke="#12263a" stroke-width="2.4" marker-end="url(#aN)"/>
+<text x="2044" y="710" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="13" font-weight="bold" fill="#12263a" text-anchor="middle" transform="rotate(-90 2044 710)"><tspan>no conflicts: /clear, then </tspan><tspan font-family="Consolas, 'Courier New', monospace" font-size="12">/upgrade-validate</tspan></text>
+<path d="M70,1297 V1285 H1000 V1297" fill="none" stroke="#0f766e" stroke-width="2.2"/>
+<text x="535" y="1271" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="24" font-weight="bold" fill="#0f766e" text-anchor="middle"><tspan font-family="Consolas, 'Courier New', monospace" font-size="23">/upgrade-project resume</tspan><tspan>  Phase 8: QA regression and check-in</tspan></text>
+<rect x="70" y="1370" width="270" height="240" rx="10" fill="#fdebc8" stroke="#e8a33d" stroke-width="2.6"/>
+<text x="86" y="1404" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="21" font-weight="bold" fill="#9a5b00" text-anchor="start"><tspan>QA</tspan></text>
+<text x="86" y="1426" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="13" font-weight="normal" fill="#6b7280" text-anchor="start"><tspan>Phase 8 · Gate D</tspan></text>
+<text x="86" y="1461" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#4a3200" text-anchor="start"><tspan>full end-to-end regression</tspan></text>
+<text x="86" y="1482" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#4a3200" text-anchor="start"><tspan>on the target box (outside</tspan></text>
+<text x="86" y="1503" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#4a3200" text-anchor="start"><tspan>this toolkit)</tspan></text>
+<text x="86" y="1524" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#4a3200" text-anchor="start"></text>
+<text x="86" y="1545" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#4a3200" text-anchor="start"><tspan>raises Jira defects for</tspan></text>
+<text x="86" y="1566" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#4a3200" text-anchor="start"><tspan>the engineer, shares results</tspan></text>
+<rect x="400" y="1370" width="270" height="240" rx="10" fill="#fdebc8" stroke="#e8a33d" stroke-width="2.6"/>
+<text x="416" y="1404" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="21" font-weight="bold" fill="#9a5b00" text-anchor="start"><tspan>You</tspan></text>
+<text x="416" y="1426" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="13" font-weight="normal" fill="#6b7280" text-anchor="start"><tspan>confirm Gate D</tspan></text>
+<text x="416" y="1461" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#4a3200" text-anchor="start"><tspan>results shared, no open</tspan></text>
+<text x="416" y="1482" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#4a3200" text-anchor="start"><tspan>defects (or accepted in</tspan></text>
+<text x="416" y="1503" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#4a3200" text-anchor="start"><tspan>writing)</tspan></text>
+<text x="416" y="1524" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#4a3200" text-anchor="start"></text>
+<text x="416" y="1545" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#4a3200" text-anchor="start"><tspan>orchestrator appends results</tspan></text>
+<text x="416" y="1566" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#4a3200" text-anchor="start"><tspan>to </tspan><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">report.md</tspan></text>
+<rect x="730" y="1370" width="270" height="240" rx="10" fill="#fdebc8" stroke="#e8a33d" stroke-width="2.6"/>
+<text x="746" y="1404" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="21" font-weight="bold" fill="#9a5b00" text-anchor="start"><tspan>You check in</tspan></text>
+<text x="746" y="1439" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#4a3200" text-anchor="start"><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">svn commit</tspan><tspan> manually</tspan></text>
+<text x="746" y="1460" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#4a3200" text-anchor="start"><tspan>after Gate D</tspan></text>
+<text x="746" y="1481" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#4a3200" text-anchor="start"><tspan>nothing in the kit commits</tspan></text>
+<path d="M70,910 L30,910 L30,1490 L68,1490" fill="none" stroke="#12263a" stroke-width="2.4" marker-end="url(#aN)"/>
+<text x="20" y="1320" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="13" font-weight="bold" fill="#12263a" text-anchor="middle" transform="rotate(-90 20 1320)"><tspan>report ready: /clear, then </tspan><tspan font-family="Consolas, 'Courier New', monospace" font-size="12">/upgrade-project resume</tspan></text>
+<path d="M340,1490 L400,1490" fill="none" stroke="#12263a" stroke-width="2.4" marker-end="url(#aN)"/>
+<path d="M670,1490 L730,1490" fill="none" stroke="#e8a33d" stroke-width="2.4" marker-end="url(#aA)"/>
+<rect x="70" y="1650" width="270" height="108" rx="10" fill="#f8e1dd" stroke="#c0392b" stroke-width="2.4" stroke-dasharray="8 6"/>
+<text x="86" y="1684" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="21" font-weight="bold" fill="#c0392b" text-anchor="start"><tspan>Open defects</tspan></text>
+<text x="86" y="1719" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>→ engineer: Phase 6 or 4</tspan></text>
+<text x="86" y="1740" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>then QA retests</tspan></text>
+<path d="M205,1610 L205,1650" fill="none" stroke="#c0392b" stroke-width="2.4" stroke-dasharray="8 6" marker-end="url(#aR)"/>
+<text x="215" y="1638" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#c0392b" text-anchor="start"><tspan>defects</tspan></text>
+<path d="M40,1810 L90,1810" fill="none" stroke="#12263a" stroke-width="2.4" marker-end="url(#aN)"/>
+<text x="98" y="1815" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>handoff</tspan></text>
+<path d="M190,1810 L240,1810" fill="none" stroke="#c0392b" stroke-width="2.4" stroke-dasharray="8 6" marker-end="url(#aR)"/>
+<text x="248" y="1815" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>loop stops</tspan></text>
+<rect x="372" y="1801" width="28" height="18" rx="4" fill="#fdebc8" stroke="#e8a33d" stroke-width="2"/>
+<text x="408" y="1815" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>you / QA act</tspan></text>
+<rect x="540" y="1801" width="28" height="18" rx="4" fill="#fff" stroke="#12263a" stroke-width="2.4"/>
+<text x="576" y="1815" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>agent</tspan></text>
+<rect x="650" y="1801" width="28" height="18" rx="6" fill="#fff" stroke="#6b7280" stroke-width="2"/>
+<text x="686" y="1815" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>main session</tspan></text>
+<text x="820" y="1815" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#6b7280" text-anchor="start"><tspan>All agents share the </tspan><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">.upgrade/</tspan><tspan> files and the target box.  Every agent ends DONE, NEEDS_DECISION, NEEDS_SERVER_ACTION or STUCK.</tspan></text>
+</svg>
