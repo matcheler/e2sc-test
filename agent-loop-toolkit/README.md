@@ -3,6 +3,12 @@
 Four Claude Code subagents and three commands that take a Jira ticket from intake to a reviewed change
 that you check in to SVN. It runs a code, test and fix loop with a locked definition of done.
 
+## How it works
+![Agent loop: /prepare-ticket (ticket-intake, test-author, your approval, check and lock) then /run-loop (implementer, reviewer, your check-in)](docs/agent-loop-diagram.png)
+
+Orange boxes are where you act; the dashed red lines are where the loop stops. All agents share
+`.loop/<KEY>/` and the shared dev servers.
+
 ## Install (once per machine)
 1. You need Claude Code, Node.js (for `node` and `npx`), Git for Windows (Git Bash), Playwright and VPN access to the dev servers.
 2. From this folder, run:
