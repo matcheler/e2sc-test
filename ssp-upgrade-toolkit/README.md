@@ -11,7 +11,7 @@ Install the agent-loop kit first (it provides `/setup-project`, `test-author`, `
 ## Use
 Open Claude Code in the project (SVN working copy) and run `/upgrade-project`. It is resumable via `.upgrade/state.json`.
 
-Phases 5-7 (unit tests, verify, report) can also be run on their own with `/upgrade-validate`, ideally in a fresh session after `/clear`; `/upgrade-project resume` then picks up again for Phase 8.
+Phases 5-7 (unit tests, verify, report) can also be run on their own with `/upgrade-validate <JIRA-KEY>` (the upgrade's parent ticket), ideally in a fresh session after `/clear`; `/upgrade-project resume` then picks up again for Phase 8.
 
 Roles: the **engineer** runs the upgrade and owns Gates A, B and C and the SVN check-in; **QA** runs the full end-to-end regression outside this toolkit, raises Jira defects for the engineer and shares the test results (Gate D).
 

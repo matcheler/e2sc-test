@@ -7,7 +7,7 @@
 </defs>
 <rect width="2060" height="1850" fill="#ffffff"/>
 <text x="40" y="62" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="46" font-weight="bold" fill="#12263a" text-anchor="start"><tspan>SSP upgrade agents</tspan></text>
-<text x="40" y="94" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="16" font-weight="normal" fill="#6b7280" text-anchor="start"><tspan font-family="Consolas, 'Courier New', monospace" font-size="15">/upgrade-project</tspan><tspan> is the orchestrator (main session): it holds </tspan><tspan font-family="Consolas, 'Courier New', monospace" font-size="15">state.json</tspan><tspan>, stops at the gates and runs the authorised </tspan><tspan font-family="Consolas, 'Courier New', monospace" font-size="15">setup</tspan><tspan> commands. Phases 5-7 can run on their own with </tspan><tspan font-family="Consolas, 'Courier New', monospace" font-size="15">/upgrade-validate</tspan><tspan>.</tspan></text>
+<text x="40" y="94" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="16" font-weight="normal" fill="#6b7280" text-anchor="start"><tspan font-family="Consolas, 'Courier New', monospace" font-size="15">/upgrade-project</tspan><tspan> is the orchestrator (main session): it holds </tspan><tspan font-family="Consolas, 'Courier New', monospace" font-size="15">state.json</tspan><tspan>, stops at the gates and runs the authorised </tspan><tspan font-family="Consolas, 'Courier New', monospace" font-size="15">setup</tspan><tspan> commands. Phases 5-7 can run on their own with </tspan><tspan font-family="Consolas, 'Courier New', monospace" font-size="15">/upgrade-validate &lt;JIRA-KEY&gt;</tspan><tspan>.</tspan></text>
 <line x1="40" y1="112" x2="2020" y2="112" stroke="#d9dee4" stroke-width="1.5"/>
 <path d="M70,202 V190 H1990 V202" fill="none" stroke="#0f766e" stroke-width="2.2"/>
 <text x="1030" y="176" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="24" font-weight="bold" fill="#0f766e" text-anchor="middle"><tspan font-family="Consolas, 'Courier New', monospace" font-size="23">/upgrade-project</tspan><tspan>  Phases 0-4: assess, deploy, resolve</tspan></text>
@@ -77,7 +77,7 @@
 <text x="1406" y="620" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>→ you decide</tspan></text>
 <path d="M1790,490 L1790,572 L1660,572" fill="none" stroke="#c0392b" stroke-width="2.4" stroke-dasharray="8 6" marker-end="url(#aR)"/>
 <path d="M70,717 V705 H1990 V717" fill="none" stroke="#0f766e" stroke-width="2.2"/>
-<text x="1030" y="691" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="24" font-weight="bold" fill="#0f766e" text-anchor="middle"><tspan font-family="Consolas, 'Courier New', monospace" font-size="23">/upgrade-validate</tspan><tspan>  Phases 5-7: unit tests, verify, report</tspan></text>
+<text x="1030" y="691" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="24" font-weight="bold" fill="#0f766e" text-anchor="middle"><tspan font-family="Consolas, 'Courier New', monospace" font-size="23">/upgrade-validate &lt;JIRA-KEY&gt;</tspan><tspan>  Phases 5-7: unit tests, verify, report</tspan></text>
 <rect x="1720" y="790" width="270" height="240" rx="10" fill="#fdebc8" stroke="#e8a33d" stroke-width="2.6"/>
 <text x="1736" y="824" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="21" font-weight="bold" fill="#9a5b00" text-anchor="start"><tspan>You</tspan></text>
 <text x="1736" y="846" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="13" font-weight="normal" fill="#6b7280" text-anchor="start"><tspan>Gate C</tspan></text>
@@ -158,9 +158,9 @@
 <path d="M500,1030 L500,1135 L730,1135" fill="none" stroke="#c0392b" stroke-width="2.4" stroke-dasharray="8 6" marker-end="url(#aR)"/>
 <text x="492" y="1056" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#c0392b" text-anchor="end"><tspan>BLOCK</tspan></text>
 <path d="M1990,370 L2030,370 L2030,910 L1992,910" fill="none" stroke="#12263a" stroke-width="2.4" marker-end="url(#aN)"/>
-<text x="2044" y="710" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="13" font-weight="bold" fill="#12263a" text-anchor="middle" transform="rotate(-90 2044 710)"><tspan>no conflicts: /clear, then </tspan><tspan font-family="Consolas, 'Courier New', monospace" font-size="12">/upgrade-validate</tspan></text>
+<text x="2044" y="710" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="13" font-weight="bold" fill="#12263a" text-anchor="middle" transform="rotate(-90 2044 710)"><tspan>no conflicts: /clear, then </tspan><tspan font-family="Consolas, 'Courier New', monospace" font-size="12">/upgrade-validate &lt;KEY&gt;</tspan></text>
 <path d="M70,1297 V1285 H1000 V1297" fill="none" stroke="#0f766e" stroke-width="2.2"/>
-<text x="535" y="1271" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="24" font-weight="bold" fill="#0f766e" text-anchor="middle"><tspan font-family="Consolas, 'Courier New', monospace" font-size="23">/upgrade-project resume</tspan><tspan>  Phase 8: QA regression and check-in</tspan></text>
+<text x="535" y="1271" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="24" font-weight="bold" fill="#0f766e" text-anchor="middle"><tspan>Phase 8: QA end-to-end regression and check-in</tspan></text>
 <rect x="70" y="1370" width="270" height="240" rx="10" fill="#fdebc8" stroke="#e8a33d" stroke-width="2.6"/>
 <text x="86" y="1404" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="21" font-weight="bold" fill="#9a5b00" text-anchor="start"><tspan>QA</tspan></text>
 <text x="86" y="1426" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="13" font-weight="normal" fill="#6b7280" text-anchor="start"><tspan>Phase 8 · Gate D</tspan></text>
