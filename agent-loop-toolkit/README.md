@@ -4,10 +4,17 @@ Four Claude Code subagents and three commands that take a Jira ticket from intak
 that you check in to SVN. It runs a code, test and fix loop with a locked definition of done.
 
 ## How it works
-![Agent loop: /prepare-ticket (ticket-intake, test-author, your approval, check and lock) then /run-loop (implementer, reviewer, your check-in)](docs/agent-loop-diagram.png)
+![Agent loop: /prepare-ticket (ticket-intake, test-author, your approval of the test cases, check and lock) then /run-loop (implementer, reviewer, your check-in)](docs/agent-loop-diagram.png)
 
 Orange boxes are where you act; the dashed red lines are where the loop stops. All agents share
 `.loop/<KEY>/` and the shared dev servers.
+
+The loop's tests are unit-scope: one screen or element, or one upload, with one action under test.
+End-to-end testing is QA's job, after the ticket is Resolved.
+
+To change the diagram, edit `docs/agent-loop-diagram.html` and re-render it with Playwright's Chromium
+(from a project that has `e2sc-ui_tests/node_modules`):
+`node docs/render-diagram.js <path to node_modules/playwright-core> docs/agent-loop-diagram.html docs/agent-loop-diagram.png`
 
 ## Install (once per machine)
 1. You need Claude Code, Node.js (for `node` and `npx`), Git for Windows (Git Bash), Playwright and VPN access to the dev servers.

@@ -29,14 +29,15 @@ Given a Jira ticket key:
      the ticket.
 4. Judge readiness. A ticket is READY only if:
    - acceptance criteria are specific and testable (restate them yourself if the ticket is prose; that's fine as long as nothing has to be guessed)
-   - each criterion can be proven by a Playwright test against the dev server, because that is the only verification gate
+   - each criterion is either provable by a unit-scope Playwright test against the dev server (one screen or element, or one upload), or is clearly an end-to-end check that QA will do after the ticket is Resolved. The loop's tests are a narrow gate, and QA does the end-to-end testing. Say in the brief which criteria are which. At least one criterion must be provable by a test, or the user must agree to verify manually.
    - affected components can be identified with confidence
    - there are no open questions or conflicting requirements
    - it does not touch anything on `~/.claude/loop/always-human.md`, unless a Jira comment explicitly approves it
-5. Write the brief or the questions to `.loop/<KEY>/intake.md`. You may create files only under `.loop/<KEY>/`.
+5. Record **B2B upload verification** in `.loop/<KEY>/intake.md`: `specified` with the quoted ticket text or Jira comment that asks for it (an inbox drop, a B2B file or an EDI route to be tested), or `not specified`. test-author proposes inbox-drop cases only when it says `specified`. If the change sits in a B2B transform but the ticket doesn't say how to verify it, add a question for the user, and note that the default is to leave it to QA. That question alone doesn't make the ticket NOT_READY.
+6. Write the brief or the questions to `.loop/<KEY>/intake.md`. You may create files only under `.loop/<KEY>/`.
 
 Return exactly one of:
-- READY: a short brief with the acceptance criteria restated as numbered, testable statements, the affected files and modules, the relevant config skills (e2sc-config, e2sc-pcmm, e2sc-io, e2na-config, and so on), and any risks.
+- READY: a short brief with the acceptance criteria restated as numbered, testable statements, the affected files and modules, the relevant config skills (e2sc-config, e2sc-pcmm, e2sc-io, e2na-config, and so on), the B2B upload verification field, the criteria left to QA, and any risks.
 - NOT_READY: a numbered list of specific questions that would make it ready. Do not guess answers.
 
 Keep the returned brief or question list short. The full version is in `intake.md`.

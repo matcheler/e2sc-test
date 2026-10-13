@@ -42,8 +42,12 @@ fi
   grep -E "^ *[0-9]+ (passed|failed|flaky|skipped|did not run)" "$LOG"
   echo
   awk '
-    /^ +[0-9]+\) \[/ { print; n = 0; inblk = 1; next }
-    inblk && n < 8 && /(Error|Expected|Received|Locator|locator|waiting for|Timeout|timeout|\.spec\.ts:[0-9]+)/ { sub(/^ +/, "    "); print; n++ }
+    # A test can hold several expect.soft failures, each its own "Error:" block, so the cap is per
+    # block (not per test) and the long "at <path>" lines are skipped, so every soft failure shows.
+    /^ +[0-9]+\) \[/ { print; n = 0; inblk = 1; nerr = 0; next }
+    inblk && /^ +[A-Za-z]*Error:/ { nerr++; n = 0 }
+    inblk && nerr <= 12 && /^ +at / { if (match($0, /[^\\\/]+\.spec\.ts:[0-9]+/)) print "    at " substr($0, RSTART, RLENGTH); next }
+    inblk && nerr <= 12 && n < 5 && /(Error|Expected|Received|Locator|locator|waiting for|Timeout|timeout|\.spec\.ts:[0-9]+)/ { sub(/^ +/, "    "); print; n++ }
     /^ +[0-9]+ (passed|failed|flaky|skipped)/ { inblk = 0 }
   ' "$LOG"
 } > "$SUMMARY"

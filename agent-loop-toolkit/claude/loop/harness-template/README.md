@@ -22,10 +22,14 @@ npm run codegen                              # record a flow for test-author
   iframes, download capture and Job Status polling, and field controls (autocomplete, complex
   combobox, date range). `MENU_MAP` starts empty; fill it from this project's menu if needed.
 - **`tests/excel.ts`**: read (or build) .xlsx workbooks with exceljs.
+- **`tests/upload-fixtures.ts`**: build upload files for a test. `uniqueValue` and `relativeDate`
+  give per-run keys and future dates; `buildXlsxFromTemplate` makes an Excel upload file from a
+  template; `fillTemplateText` fills `{{TOKEN}}` placeholders in a B2B flat-file template. Keep
+  templates in `fixtures/<KEY>/` and write results to `fixtures/<KEY>/generated/` (not committed).
 - **`tests/loop-helpers.ts`**: `startWorkflow`, the reliable navigation, and `pickTypeahead`.
 - **`tests/locked/<KEY>/`**: each ticket's definition of done. Once `.loop/<KEY>/tests.locked`
   exists, a hook stops agents editing it.
 - **`recordings/<KEY>/`**: codegen recordings (reference only).
 - **`fixtures/<KEY>/`**: upload files.
 
-Don't commit `node_modules/`, `test-results/`, `playwright-report/` or `recordings/`.
+Don't commit `node_modules/`, `test-results/`, `playwright-report/`, `recordings/` or `fixtures/*/generated/`.
