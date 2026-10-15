@@ -100,14 +100,14 @@
 <text x="1076" y="824" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="21" font-weight="bold" fill="#12263a" text-anchor="start"><tspan>Check, lock</tspan></text>
 <text x="1076" y="846" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="13" font-weight="normal" fill="#6b7280" text-anchor="start"><tspan>Phase 5 · main session</tspan></text>
 <text x="1076" y="881" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">loop-verify.sh &lt;TICKET&gt;-unit</tspan></text>
-<text x="1076" y="902" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>must be GREEN on the target</tspan></text>
+<text x="1076" y="902" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>first run on the target box</tspan></text>
 <text x="1076" y="923" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"></text>
 <text x="1076" y="944" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">tests.locked</tspan><tspan> (sha256)</tspan></text>
 <text x="1076" y="965" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"></text>
-<text x="1076" y="986" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>product failure → merger</tspan></text>
+<text x="1076" y="986" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>failures → upgrade-verifier</tspan></text>
 <rect x="730" y="790" width="270" height="240" rx="10" fill="#fff" stroke="#12263a" stroke-width="2.6"/>
 <text x="746" y="824" font-family="Consolas, 'Courier New', monospace" font-size="21" font-weight="bold" fill="#12263a" text-anchor="start"><tspan>upgrade-verifier</tspan></text>
-<text x="746" y="846" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="13" font-weight="normal" fill="#6b7280" text-anchor="start"><tspan>Phase 6</tspan></text>
+<text x="746" y="846" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="13" font-weight="normal" fill="#6b7280" text-anchor="start"><tspan>Phase 6 · the one fix loop</tspan></text>
 <text x="746" y="884" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#0f766e" text-anchor="start"><tspan>READS</tspan></text>
 <text x="746" y="904" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>locked unit tests, e2sc logs</tspan></text>
 <text x="746" y="924" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>open Jira defects</tspan></text>
@@ -116,13 +116,13 @@
 <text x="746" y="992" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#0f766e" text-anchor="start"><tspan>WRITES</tspan></text>
 <text x="746" y="1012" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">iterations.md</tspan><tspan>, </tspan><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">handover.md</tspan></text>
 <rect x="400" y="790" width="270" height="240" rx="10" fill="#fff" stroke="#12263a" stroke-width="2.6"/>
-<text x="416" y="824" font-family="Consolas, 'Courier New', monospace" font-size="21" font-weight="bold" fill="#12263a" text-anchor="start"><tspan>reviewer</tspan></text>
+<text x="416" y="824" font-family="Consolas, 'Courier New', monospace" font-size="21" font-weight="bold" fill="#12263a" text-anchor="start"><tspan>upgrade-reviewer</tspan></text>
 <text x="416" y="846" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="13" font-weight="normal" fill="#6b7280" text-anchor="start"><tspan>Phase 6</tspan></text>
 <text x="416" y="884" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#0f766e" text-anchor="start"><tspan>READS</tspan></text>
-<text x="416" y="904" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>assessment + Jira tickets</tspan></text>
-<text x="416" y="924" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">svn diff</tspan></text>
+<text x="416" y="904" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>assessment, merge-log, tickets</tspan></text>
+<text x="416" y="924" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>svn diff since rollback</tspan></text>
 <text x="416" y="948" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#0f766e" text-anchor="start"><tspan>WRITES</tspan></text>
-<text x="416" y="968" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">review.md</tspan></text>
+<text x="416" y="968" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">.upgrade/review.md</tspan></text>
 <text x="416" y="988" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>APPROVE / NOTES / BLOCK</tspan></text>
 <rect x="70" y="790" width="270" height="240" rx="14" fill="#fff" stroke="#6b7280" stroke-width="2.2"/>
 <text x="86" y="824" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="21" font-weight="bold" fill="#12263a" text-anchor="start"><tspan>Report</tspan></text>

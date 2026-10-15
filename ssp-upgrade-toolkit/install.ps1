@@ -15,7 +15,7 @@ Get-ChildItem $src -Recurse -File | ForEach-Object {
 }
 
 # prerequisite check: the agent-loop kit
-$missing = @('commands\setup-project.md','agents\reviewer.md','loop\servers.md') |
+$missing = @('commands\setup-project.md','loop\servers.md') |
     Where-Object { -not (Test-Path (Join-Path $Dest $_)) }
 if ($missing) { Write-Warning "Agent-loop kit not found in $Dest. Missing: $($missing -join ', '). Install it first." }
 else { Write-Host 'Prerequisites OK. Run /upgrade-project in your project.' }
