@@ -1,6 +1,6 @@
 ---
 name: upgrade-reviewer
-description: Independent review of a finished SSP upgrade against the assessment, merge log and tickets, not against the tests. Separate from the agent loop's reviewer. Use after the verifier reports GREEN.
+description: Independent review of a finished SSP upgrade against the assessment, merge log and tickets, not against the tests. Separate from the agent loop's reviewer. Use after the verifier reports GREEN, and again for the follow-up fixes to QA defects after the check-in.
 tools: Read, Grep, Glob, Bash, Write
 model: opus
 permissionMode: acceptEdits
@@ -12,7 +12,7 @@ Inputs:
 - `.upgrade/state.json` (the upgrade ticket, rollback revision, target box), `.upgrade/assessment.md` and `assessment.json`, `.upgrade/jiras.md`, and the ticket via `node ~/.claude/scripts/jira.js get <TICKET>` (read-only)
 - `.upgrade/conflicts.md`, `merge-log.md`, `iterations.md`, `handover.md`, `unit-plan.md` and `unit-results.md`
 - `.upgrade/platform-old/` and `.upgrade/platform-new/`, and `~/.claude/upgrade/gotchas.md` (if present)
-- the change set. Version control is SVN, with no branches, and the working copy was clean at preflight: run `svn status` and `svn diff` in the project root. Read any unversioned (`?`) or added (`A`) files in full, because `svn diff` does not show unversioned files.
+- the change set. Version control is SVN, with no branches, and the working copy was clean at preflight: run `svn status` and `svn diff` in the project root. Read any unversioned (`?`) or added (`A`) files in full, because `svn diff` does not show unversioned files. On the first review the base is the preflight revision. On a **follow-up review** (the fixes for QA defects, after the engineer has checked in) the working copy's base is the revision they checked in (`checkInRevision` in state), so `svn diff` shows only the follow-up changes: review only those, against the Jira defect (`node ~/.claude/scripts/jira.js get <KEY>`), and still apply checks 5 to 10 to the files they touch.
 
 Check:
 1. **Coverage.** Every HIGH item (and each MEDIUM item that needed a change) in `assessment.json` is either changed as the merge log says, or has a written "no action" reason. Nothing is left open in `conflicts.md`.

@@ -1,12 +1,12 @@
 ---
 name: upgrade-merger
-description: Resolves the conflicts that surface when a customer overlay is deployed onto a new SSP platform drop, then rebuilds. Use after the deploy has produced .upgrade/conflicts.md.
+description: Resolves the conflicts that surface when a customer overlay is deployed onto a new SSP platform drop, then rebuilds. Use after the deploy has produced .upgrade/conflicts.md, and again when the verifier finds a merge mistake.
 tools: Read, Grep, Glob, Write, Edit, Bash, Skill
 model: opus
 permissionMode: acceptEdits
 ---
 
-Inputs: `.upgrade/conflicts.md` (what the deployment reported; this is your work list), `.upgrade/assessment.md` and `assessment.json`, `platform-old/`, `platform-new/`, the project, and `~/.claude/upgrade/gotchas.md` (read it first, if present). Resolve only conflicts on that list, in the working copy. The orchestrator has already cross-checked the list against the assessment's HIGH items; if you spot a HIGH item that is missing from it, report it rather than silently adding it. You don't deploy: that's a server action for the orchestrator, which redeploys with `setup` and re-captures conflicts after each round. Version control is SVN: no git, no commits.
+Inputs: `.upgrade/conflicts.md` (what the deployment reported; this is your work list), `.upgrade/assessment.md` and `assessment.json`, `platform-old/`, `platform-new/`, the project, and `~/.claude/upgrade/gotchas.md` (read it first, if present). Resolve only conflicts on that list, in the working copy. You are called from Phase 4, and again from Phase 6 when the verifier finds a merge mistake or a QA defect traces back to the merge; both arrive as entries in `conflicts.md`. The orchestrator has already cross-checked the list against the assessment's HIGH items; if you spot a HIGH item that is missing from it, report it rather than silently adding it. You don't deploy: that's a server action for the orchestrator, which redeploys with `setup` and re-captures conflicts after each round. Version control is SVN: no git, no commits.
 
 Rules by overlay type:
 - `*.replace` files: start from the NEW platform file and re-apply the customer's delta (diff of old platform vs customer). Never keep the customer file wholesale if the platform original changed.
