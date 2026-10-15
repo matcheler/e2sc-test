@@ -17,7 +17,7 @@ Generic across customers. Customer-specific values come from the project and `~/
 State lives in `.upgrade/state.json` (phase, versions, paths, box, people, gates approved, iteration counts, redeploy count). Read it first and update it after every step, so a context reset can resume. Artifacts go in `.upgrade/`. Subagents read `~/.claude/upgrade/gotchas.md` first.
 
 ## Phase 0 - Preflight
-1. This command needs the agent-loop kit (`/setup-project`, the `test-author` and `reviewer` agents, `~/.claude/loop/servers.md`). If any is missing, stop and tell the engineer to install it. The project must have a row in `servers.md`; if not, stop and ask for `/setup-project`.
+1. This command needs the agent-loop kit (`/setup-project`, the `reviewer` agent, `~/.claude/loop/servers.md`). If any is missing, stop and tell the engineer to install it. The project must have a row in `servers.md`; if not, stop and ask for `/setup-project`.
 2. `svn status` must be clean (or the engineer acknowledges). Record the `svn info` revision as the rollback point in state.
 3. Ask the engineer (AskUserQuestion), then validate:
    - current SSP version (must match `ssp.version` in `solution/project/pom.xml`)
@@ -57,7 +57,7 @@ Delegate to the `upgrade-merger` subagent with `.upgrade/conflicts.md`. It resol
 When no conflicts remain: Phase 5 (continue here, or run `/upgrade-validate <JIRA-KEY>` in a fresh session).
 
 ## Phase 5 - Playwright unit tests -> GATE C (engineer)
-Defined in `/upgrade-validate` (Phases 5-7). Read `~/.claude/commands/upgrade-validate.md` and follow its Phase 5 here, or tell the engineer to run `/upgrade-validate <JIRA-KEY>` in a fresh session (cheaper: everything it needs is in `.upgrade/` and `.loop/`). In short: the assessor's `unit-tests.md` cases are approved, `test-author` writes the Playwright tests, and `loop-verify.sh <TICKET>-unit` must be GREEN on the target box. It runs on every upgrade.
+Defined in `/upgrade-validate` (Phases 5-7). Read `~/.claude/commands/upgrade-validate.md` and follow its Phase 5 here, or tell the engineer to run `/upgrade-validate <JIRA-KEY>` in a fresh session (cheaper: everything it needs is in `.upgrade/` and `.loop/`). In short: the assessor's `unit-tests.md` cases are approved, `upgrade-test-author` writes the Playwright tests, and `loop-verify.sh <TICKET>-unit` must be GREEN on the target box. It runs on every upgrade.
 
 ## Phase 6 - Verify and fix (max 3 iterations)
 Defined in `/upgrade-validate`, Phase 6. In short: `upgrade-verifier` runs the unit gate and fixes product/config issues, open Jira defects assigned to the engineer are worked, then `reviewer` checks the result.

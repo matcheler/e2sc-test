@@ -88,13 +88,14 @@
 <text x="1736" y="965" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#4a3200" text-anchor="start"><tspan>set what tests may do:</tspan></text>
 <text x="1736" y="986" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#4a3200" text-anchor="start"><tspan>file drops, log reads</tspan></text>
 <rect x="1390" y="790" width="270" height="240" rx="10" fill="#fff" stroke="#12263a" stroke-width="2.6"/>
-<text x="1406" y="824" font-family="Consolas, 'Courier New', monospace" font-size="21" font-weight="bold" fill="#12263a" text-anchor="start"><tspan>test-author</tspan></text>
-<text x="1406" y="846" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="13" font-weight="normal" fill="#6b7280" text-anchor="start"><tspan>Phase 5 · TESTS mode</tspan></text>
+<text x="1406" y="824" font-family="Consolas, 'Courier New', monospace" font-size="18" font-weight="bold" fill="#12263a" text-anchor="start"><tspan>upgrade-test-author</tspan></text>
+<text x="1406" y="846" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="13" font-weight="normal" fill="#6b7280" text-anchor="start"><tspan>Phase 5 · UNIT-UI only</tspan></text>
 <text x="1406" y="884" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#0f766e" text-anchor="start"><tspan>READS</tspan></text>
-<text x="1406" y="904" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">cases.approved</tspan></text>
+<text x="1406" y="904" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">unit-tests.md</tspan><tspan>, </tspan><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">cases.approved</tspan></text>
 <text x="1406" y="924" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">recordings/&lt;TICKET&gt;-unit/</tspan></text>
 <text x="1406" y="948" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#0f766e" text-anchor="start"><tspan>WRITES</tspan></text>
 <text x="1406" y="968" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">tests/locked/&lt;TICKET&gt;-unit/</tspan></text>
+<text x="1406" y="988" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">unit-plan.md</tspan></text>
 <rect x="1060" y="790" width="270" height="240" rx="14" fill="#fff" stroke="#6b7280" stroke-width="2.2"/>
 <text x="1076" y="824" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="21" font-weight="bold" fill="#12263a" text-anchor="start"><tspan>Check, lock</tspan></text>
 <text x="1076" y="846" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="13" font-weight="normal" fill="#6b7280" text-anchor="start"><tspan>Phase 5 · main session</tspan></text>

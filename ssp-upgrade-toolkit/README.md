@@ -3,7 +3,7 @@
 Claude Code commands and agents for upgrading an E2open SSP customer overlay project to a new platform drop. Generic across customers.
 
 ## Install
-Install the agent-loop kit first (it provides `/setup-project`, `test-author`, `reviewer` and `servers.md`), then:
+Install the agent-loop kit first (it provides `/setup-project`, `reviewer`, `loop-verify.sh`, the `e2sc-ui_tests` harness template, `servers.md`, and the `test-author` file that `upgrade-test-author` reads for harness lessons), then:
 
     powershell -File install.ps1            # installs into ~/.claude
     powershell -File install.ps1 -Dest X    # test install elsewhere
@@ -27,7 +27,7 @@ Every subagent ends with DONE, NEEDS_DECISION, NEEDS_SERVER_ACTION or STUCK. Ass
 | 2 | First deployment | Engineer | You update `comp_dependencies` and rootpom `ssp.version`; the agent verifies they match the target. `setup remove` then `setup` on the target box. Re-seed data, run the smoke check. | Deployed box | A deploy step fails |
 | 3 | Capture conflicts | Engineer | Run any extra p2c/reload/restart steps. Collect the conflicts the deployment reported, tag each with risk and ticket. Cross-check every HIGH assessment item is listed or marked "no action". | `conflicts.md` | **Gate B** |
 | 4 | Resolve | Engineer | `upgrade-merger` resolves each conflict (`*.replace` starts from the new platform file and re-applies the customer delta). Redeploy with plain `setup`, re-capture, smoke check. Up to 3 rounds, within the 5-redeploy cap. | `merge-log.md`, updated `conflicts.md` | Unresolved HIGH conflict |
-| 5 | Playwright unit tests (every upgrade) | Engineer | Validates the build. The assessor's `.upgrade/unit-tests.md` lists a case for each HIGH-risk item and one basic case per upload/download workflow (carried forward from the previous upgrade's suite where one exists). The engineer approves the cases, `test-author` writes the Playwright tests (recordings by the engineer where requested), and `loop-verify.sh <TICKET>-unit` must be GREEN on the target box. Failures go back through the merger (max 3 rounds). Narrow by design: QA's full end-to-end regression is separate and outside this toolkit. | `unit-tests.md`, `unit-results.md`, `tests/locked/<TICKET>-unit/` | **Gate C** |
+| 5 | Playwright unit tests (every upgrade) | Engineer | Validates the build. The assessor's `.upgrade/unit-tests.md` lists a case for each HIGH-risk item and one basic case per upload/download workflow (carried forward from the previous upgrade's suite where one exists). The engineer approves the cases, `upgrade-test-author` writes the Playwright tests (recordings by the engineer where requested), and `loop-verify.sh <TICKET>-unit` must be GREEN on the target box. Failures go back through the merger (max 3 rounds). Narrow by design: QA's full end-to-end regression is separate and outside this toolkit. | `unit-tests.md`, `unit-results.md`, `tests/locked/<TICKET>-unit/` | **Gate C** |
 | 6 | Verify and fix | Engineer | `upgrade-verifier` runs the unit gate on the target box, reads server logs, classifies failures and fixes product/config/merge issues (max 3 iterations), and works any open Jira defects assigned to the engineer. Server actions come back as NEEDS_SERVER_ACTION. Then `reviewer` checks the work against the assessment. | `iterations.md`, `handover.md`, review | STUCK, or review findings |
 | 7 | Report | Engineer | Summarise versions, files by overlay type, conflicts auto vs human resolved, unit test results, open issues, server actions, redeploy count, rollback revision. Append new gotchas. | `report.md`, `gotchas.md` | QA regression is next |
 | 8 | QA end-to-end regression | QA | QA runs the full end-to-end regression on the target box outside this toolkit, raises a Jira defect for each failure (assigned to the engineer) and shares the test results. The engineer gives the orchestrator the results location and the open defect keys; defects are fixed in Phase 6 or 4 and QA retests. Gate D passes when results are shared and no open defects remain (or the engineer accepts them in writing). | Results reference and defect list in `report.md` | **Gate D** |
@@ -44,7 +44,7 @@ Editable source: `docs/upgrade-agents.svg`.
 | `upgrade-assessor` | 1, and 5 (update) | Read-only on the project; writes under `.upgrade/`. One per component. Compares the old and new platform against every customisation, ranks risk HIGH/MEDIUM/LOW, drafts the Jira tickets, and writes the Playwright unit-test case list (`unit-tests.md`) and `assessment.json`. |
 | `upgrade-merger` | 4 | Resolves the conflicts the deployment reported, in the working copy, using the old platform, new platform and customer versions (`*.replace` files start from the new platform file). Uses the config skills, logs every decision in `merge-log.md`, and returns NEEDS_SERVER_ACTION where a server compile is needed. |
 | `upgrade-verifier` | 6 | Runs the unit gate on the target box, reads the server logs, classifies each failure, and fixes product, config and merge issues through the config skills. Works any open Jira defects assigned to the engineer. Never edits locked tests. Max 3 iterations. |
-| `test-author` (agent-loop kit) | 5 | Writes the Playwright unit tests for the approved cases (TESTS mode) and asks for codegen recordings where it needs them. |
+| `upgrade-test-author` | 5 | Writes the Playwright unit tests for the engineer-approved cases (UNIT-UI only; logic-unit and end-to-end are listed as not written). Tests are expected to pass on the upgraded box, and it asks for codegen recordings where needed. Separate from the agent loop's `test-author`; it reuses that file's harness lessons and upload rules. |
 | `reviewer` (agent-loop kit) | 6 | Independent review of the finished changes against the assessment and tickets: checks no `*.replace` file still drops platform changes and that locked tests are untouched. |
 
 The agents use these skills for config changes and checks: `e2sc-config`, `e2sc-ocmm`, `e2sc-pcmm`, `e2sc-io`, `e2sc-cfg`, `alert-config`, `e2na-config`, `e2sc-logging` and `e2sc-playwright`.
@@ -57,6 +57,6 @@ The agents use these skills for config changes and checks: `e2sc-config`, `e2sc-
 ## Contents
 - `claude/commands/upgrade-project.md` - orchestrator
 - `claude/commands/upgrade-validate.md` - Phases 5-7: unit tests, verify and fix, report
-- `claude/agents/upgrade-assessor.md`, `upgrade-merger.md`, `upgrade-verifier.md`
+- `claude/agents/upgrade-assessor.md`, `upgrade-merger.md`, `upgrade-test-author.md`, `upgrade-verifier.md`
 - `docs/upgrade-agents.png`, `upgrade-agents.svg` - agent and phase diagram
 - `claude/upgrade/gotchas.md`
