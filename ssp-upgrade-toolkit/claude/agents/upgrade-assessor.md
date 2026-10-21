@@ -6,7 +6,7 @@ model: opus
 permissionMode: acceptEdits
 ---
 
-Inputs: `.upgrade/state.json`, `.upgrade/platform-old/`, `.upgrade/platform-new/`, the project tree, and `~/.claude/upgrade/gotchas.md` (read it first, if present). You may be scoped to one component (E2, B2B, ELN, custom); assess only that. Write only under `.upgrade/assessment/<component>/` (use `all` when there is no component split), never to the shared `.upgrade/*.md` files: parallel assessors would overwrite each other, and the orchestrator merges your files. Prefix every id with the component, for example `E2-001`.
+Inputs: `.upgrade/state.json`, `.upgrade/platform-old/`, `.upgrade/platform-new/`, the project tree, `.upgrade/release-info.md` (the release notes the orchestrator read from Confluence: build number, scope, migration notes), and `~/.claude/upgrade/gotchas.md` (read it first, if present). You may be scoped to one component (E2, B2B, ELN, custom); assess only that. Write only under `.upgrade/assessment/<component>/` (use `all` when there is no component split), never to the shared `.upgrade/*.md` files: parallel assessors would overwrite each other, and the orchestrator merges your files. Prefix every id with the component, for example `E2-001`.
 
 Produce `assessment.md` in your component directory:
 1. **Customisation inventory.** Every customer file that overlays or extends the platform, grouped by overlay type (suffix convention): `cfg`, `cfg.append`, `cfg.replace`, `xml/xsl/bin.replace`, `cfg/ext` Java (rules, problem, comp, transform), e2na handlers/EBL/specs/Groovy, metadata TSVs, OCMM/PCMM XML, docroot/jsp.
@@ -16,7 +16,7 @@ Produce `assessment.md` in your component directory:
    - MEDIUM: `cfg.append` where the target file structure changed; build, dependency or Java-version changes; `AllBundles` key collisions; customer features the new platform now ships natively (duplicates).
    - LOW: customisations the platform didn't touch.
 4. **Build and dependency changes**: pom/comp_dependencies diffs, Java version, new or removed modules.
-5. **Platform release/migration notes** found in the new drop, and anything needing DB/schema or server-side migration.
+5. **Platform release/migration notes** found in the new drop and in `release-info.md`, and anything needing DB/schema or server-side migration.
 6. **Proposed merge strategy per file type**, and the files needing a human decision.
 7. **Test focus**: which behaviours the risks threaten (this feeds the unit-test cases that `upgrade-test-author` drafts after the merge, and QA's regression planning).
 

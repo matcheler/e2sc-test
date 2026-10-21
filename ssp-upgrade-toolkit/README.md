@@ -8,6 +8,8 @@ Install the agent-loop kit first (it provides `/setup-project`, `loop-verify.sh`
     powershell -File install.ps1            # installs into ~/.claude
     powershell -File install.ps1 -Dest X    # test install elsewhere
 
+Phase 1 reads the release notes on Confluence with `node ~/.claude/scripts/confluence.js` (installed by this kit, read-only). It needs `~/.confluence-cookie`, an SSO session cookie kept the same way as `~/.jira-cookie`.
+
 ## Use
 Open Claude Code in the project (SVN working copy) and run `/upgrade-project`. It is resumable via `.upgrade/state.json`.
 
@@ -15,7 +17,7 @@ Phases 5-7 (unit tests, verify, report) can also be run on their own with `/upgr
 
 Roles: the **engineer** runs the upgrade and owns Gates A, B, C and D (D: review the report, then check in with SVN); **QA** runs the full end-to-end regression outside this toolkit after the check-in, raises Jira defects for the engineer and shares the test results.
 
-Flow: preflight (versions, SVN rollback point, target box, dist zip locations) -> platform trees from the dist zips and assessment per component with Jira tickets [Gate A; read-only, before any server action] -> first deployment (you update `comp_dependencies`, the agent verifies it, then `setup remove` + `setup`) -> capture conflicts from the deployment [Gate B] -> resolve conflicts, redeploy with plain `setup` (max 3 rounds) -> HTML conflict report to share -> Playwright unit tests of HIGH-risk items and basic upload/download flows, every upgrade [Gate C] -> verify and fix (max 3 iterations) -> independent review -> report -> you review the report and check in [Gate D] -> QA end-to-end regression (the last step). Redeploys are capped at 5 overall. Nothing commits: you check in with SVN.
+Flow: preflight (versions, SVN rollback point, target box, dist zip locations) -> platform trees from the dist zips and assessment per component with Jira tickets [Gate A; read-only, before any server action] -> update and deploy (the orchestrator edits `comp_dependencies` and `pom.xml` from the Confluence build number, you check in the two files and kick off the Bamboo build, then `setup remove`, `setup` and the `setup migrate` commands you give it; a failed step stops as STUCK) -> capture conflicts from the deployment [Gate B] -> resolve conflicts, redeploy with plain `setup` (max 3 rounds) -> HTML conflict report to share -> Playwright unit tests of HIGH-risk items and basic upload/download flows, every upgrade [Gate C] -> verify and fix (max 3 iterations) -> independent review -> report -> you review the report and check in [Gate D] -> QA end-to-end regression (the last step). Redeploys are capped at 5 overall. Nothing commits: you check in with SVN.
 
 Every subagent ends with DONE, NEEDS_DECISION, NEEDS_SERVER_ACTION or STUCK; `upgrade-test-author` also returns CASES_READY, NEEDS_RECORDING and NEEDS_DISCOVERY. Assessor, merger and verifier read `~/.claude/upgrade/gotchas.md` first.
 
@@ -23,8 +25,8 @@ Every subagent ends with DONE, NEEDS_DECISION, NEEDS_SERVER_ACTION or STUCK; `up
 | # | Phase | Owner | What happens | Output | Stop |
 |---|-------|-------|--------------|--------|------|
 | 0 | Preflight | Engineer | Check the project is in `servers.md`, `svn status` is clean, record the rollback revision. Confirm current/target/base SSP versions, the target box, dist zip locations, the previous unit suite, deploy authorisation, Jira project, names. Check SSH to the target box. | `state.json` | Any answer fails validation |
-| 1 | Platform trees and assessment | Engineer | Extract the old and new platform trees from the dist zips (read-only). One `upgrade-assessor` per component ranks every customisation HIGH/MEDIUM/LOW against the platform delta and drafts Jira tickets under `.upgrade/assessment/<component>/`; the orchestrator merges them and composes the parent ticket. Approved drafts become tickets. The approved assessment is shared with QA. | `platform-old/`, `platform-new/`, `assessment.md`, `assessment.json`, `jiras.md`, tickets | **Gate A** |
-| 2 | First deployment | Engineer | You update `comp_dependencies` and rootpom `ssp.version`; the agent verifies they match the target. `setup remove` then `setup` on the target box. Re-seed data, run the smoke check. | Deployed box | A deploy step fails |
+| 1 | Platform trees and assessment | Engineer | Extract the old and new platform trees from the dist zips (read-only), and read the target release's notes on Confluence (build number, dates, scope) into `release-info.md` and the assessment's Release build section. One `upgrade-assessor` per component ranks every customisation HIGH/MEDIUM/LOW against the platform delta and drafts Jira tickets under `.upgrade/assessment/<component>/`; the orchestrator merges them and composes the parent ticket. Approved drafts become tickets. The approved assessment is shared with QA. | `platform-old/`, `platform-new/`, `release-info.md`, `assessment.md`, `assessment.json`, `jiras.md`, tickets | **Gate A** |
+| 2 | Update, build, deploy | Engineer | The orchestrator edits `comp_dependencies` and `pom.xml` to the build from the Confluence release notes (approved at Gate A), then waits while you check in those two files and kick off the Bamboo build. It then runs `setup remove` and `setup`, and the `setup migrate` commands you give it during the setup, each exactly as given. A failing step stops as **STUCK**: the command, why it failed, what was tried and the options go to you in `stuck-deploy.md`. Then re-seed data and run the smoke check. | Edited version files, `stuck-deploy.md` if stuck, deployed box | STUCK on a failed step; the Bamboo build |
 | 3 | Capture conflicts | Engineer | Run any extra p2c/reload/restart steps. Collect the conflicts the deployment reported, tag each with risk and ticket. Cross-check every HIGH assessment item is listed or marked "no action". | `conflicts.md` | **Gate B** |
 | 4 | Resolve | Engineer | `upgrade-merger` resolves each conflict (`*.replace` starts from the new platform file and re-applies the customer delta). Redeploy with plain `setup`, re-capture, smoke check. Up to 3 rounds, within the 5-redeploy cap. | `merge-log.md`, updated `conflicts.md` | Unresolved HIGH conflict |
 | 4b | Conflict report | Engineer | After the final successful redeploy (smoke check clean), the orchestrator writes `conflict-report.html`: one self-contained HTML file with summary counts by risk, a table of the conflicts, a table of the merged conflicts (how each was resolved and which sides were kept), anything still open, and the deployment and smoke-check result. On your say it is attached to the parent ticket or sent to QA; the kit never publishes it. | `conflict-report.html` | Ready to share |
@@ -51,13 +53,14 @@ Editable source: `docs/upgrade-agents.svg`.
 The agents use these skills for config changes and checks: `e2sc-config`, `e2sc-ocmm`, `e2sc-pcmm`, `e2sc-io`, `e2sc-cfg`, `alert-config`, `e2na-config`, `e2sc-logging` and `e2sc-playwright`.
 
 ## Safety
-- You are asked at preflight whether agents may run `setup remove` / `setup` on the dedicated upgrade box. `setup remove` is used for the first deployment only. Reloads, p2c, restarts and inbox drops always stay with you.
+- You are asked at preflight whether agents may run `setup remove` / `setup` on the dedicated upgrade box, and the `setup migrate` commands you give it during the setup. `setup remove` and the migrate commands are used for the first deployment only. Reloads, p2c, restarts and inbox drops always stay with you.
 - Locked tests are never edited to pass.
 - Platform lessons go in `~/.claude/upgrade/gotchas.md` (kept on reinstall). Keep customer names and hosts out of it.
 
 ## Contents
 - `claude/commands/upgrade-project.md` - orchestrator
 - `claude/commands/upgrade-validate.md` - Phases 5-7: unit tests, verify and fix, report
+- `claude/scripts/confluence.js` - read-only Confluence client (release notes, build number)
 - `claude/agents/upgrade-assessor.md`, `upgrade-merger.md`, `upgrade-reviewer.md`, `upgrade-test-author.md`, `upgrade-verifier.md`
 - `docs/upgrade-agents.png`, `upgrade-agents.svg` - agent and phase diagram
 - `claude/upgrade/gotchas.md`

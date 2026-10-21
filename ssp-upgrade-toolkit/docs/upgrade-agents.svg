@@ -15,22 +15,22 @@
 <text x="86" y="284" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="21" font-weight="bold" fill="#12263a" text-anchor="start"><tspan>Preflight</tspan></text>
 <text x="86" y="306" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="13" font-weight="normal" fill="#6b7280" text-anchor="start"><tspan>Phase 0 · main session</tspan></text>
 <text x="86" y="344" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#0f766e" text-anchor="start"><tspan>READS</tspan></text>
-<text x="86" y="364" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">svn status</tspan><tspan>, </tspan><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">pom.xml</tspan></text>
-<text x="86" y="384" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">servers.md</tspan></text>
-<text x="86" y="408" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#0f766e" text-anchor="start"><tspan>ASKS YOU</tspan></text>
-<text x="86" y="428" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>versions, target box, dist zips</tspan></text>
+<text x="86" y="364" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>svn status, pom.xml, servers.md</tspan></text>
+<text x="86" y="388" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#0f766e" text-anchor="start"><tspan>ASKS YOU</tspan></text>
+<text x="86" y="408" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>versions, boxes, dist zips</tspan></text>
+<text x="86" y="428" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>Bamboo plan, update script</tspan></text>
 <text x="86" y="452" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#0f766e" text-anchor="start"><tspan>WRITES</tspan></text>
 <text x="86" y="472" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">state.json</tspan><tspan>, rollback revision</tspan></text>
 <rect x="400" y="250" width="270" height="240" rx="10" fill="#fff" stroke="#12263a" stroke-width="2.6"/>
 <text x="416" y="284" font-family="Consolas, 'Courier New', monospace" font-size="21" font-weight="bold" fill="#12263a" text-anchor="start"><tspan>upgrade-assessor</tspan></text>
 <text x="416" y="306" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="13" font-weight="normal" fill="#6b7280" text-anchor="start"><tspan>Phase 1 · one per component</tspan></text>
 <text x="416" y="344" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#0f766e" text-anchor="start"><tspan>READS</tspan></text>
-<text x="416" y="364" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">platform-old/</tspan><tspan> and </tspan><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">platform-new/</tspan></text>
-<text x="416" y="384" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>overlay working copy</tspan></text>
-<text x="416" y="404" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">gotchas.md</tspan></text>
+<text x="416" y="364" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">platform-old/</tspan><tspan>, </tspan><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">-new/</tspan></text>
+<text x="416" y="384" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>Confluence release notes</tspan></text>
+<text x="416" y="404" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>overlay, </tspan><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">gotchas.md</tspan></text>
 <text x="416" y="428" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#0f766e" text-anchor="start"><tspan>WRITES</tspan></text>
 <text x="416" y="448" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">assessment.md</tspan><tspan> / </tspan><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">.json</tspan></text>
-<text x="416" y="468" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">jiras.md</tspan></text>
+<text x="416" y="468" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">jiras.md</tspan><tspan>, </tspan><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">release-info.md</tspan></text>
 <rect x="730" y="250" width="270" height="240" rx="10" fill="#fdebc8" stroke="#e8a33d" stroke-width="2.6"/>
 <text x="746" y="284" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="21" font-weight="bold" fill="#9a5b00" text-anchor="start"><tspan>You</tspan></text>
 <text x="746" y="306" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="13" font-weight="normal" fill="#6b7280" text-anchor="start"><tspan>Gate A</tspan></text>
@@ -39,13 +39,16 @@
 <text x="746" y="383" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#4a3200" text-anchor="start"></text>
 <text x="746" y="404" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#4a3200" text-anchor="start"><tspan>tickets are created</tspan></text>
 <text x="746" y="425" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#4a3200" text-anchor="start"><tspan>with </tspan><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">jira.js</tspan></text>
-<rect x="1060" y="250" width="270" height="240" rx="10" fill="#fdebc8" stroke="#e8a33d" stroke-width="2.6"/>
-<text x="1076" y="284" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="21" font-weight="bold" fill="#9a5b00" text-anchor="start"><tspan>You</tspan></text>
-<text x="1076" y="306" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="13" font-weight="normal" fill="#6b7280" text-anchor="start"><tspan>Phase 2 · deploy</tspan></text>
-<text x="1076" y="341" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#4a3200" text-anchor="start"><tspan>update </tspan><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">comp_dependencies</tspan></text>
-<text x="1076" y="362" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#4a3200" text-anchor="start"></text>
-<text x="1076" y="383" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#4a3200" text-anchor="start"><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">setup remove</tspan><tspan> + </tspan><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">setup</tspan></text>
-<text x="1076" y="404" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#4a3200" text-anchor="start"><tspan>on the target box</tspan></text>
+<rect x="1060" y="250" width="270" height="240" rx="14" fill="#fff" stroke="#6b7280" stroke-width="2.2"/>
+<text x="1076" y="284" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="21" font-weight="bold" fill="#12263a" text-anchor="start"><tspan>Update, deploy</tspan></text>
+<text x="1076" y="306" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="13" font-weight="normal" fill="#6b7280" text-anchor="start"><tspan>Phase 2 · main session</tspan></text>
+<text x="1076" y="341" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>edits </tspan><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">comp_dependencies</tspan></text>
+<text x="1076" y="362" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>and </tspan><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">pom.xml</tspan><tspan> from the</tspan></text>
+<text x="1076" y="383" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>Confluence build number</tspan></text>
+<text x="1076" y="404" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>after your check-in + build:</tspan></text>
+<text x="1076" y="425" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">setup remove</tspan><tspan>, </tspan><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">setup</tspan><tspan>,</tspan></text>
+<text x="1076" y="446" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">setup migrate</tspan><tspan> as you give</tspan></text>
+<text x="1076" y="467" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>the commands</tspan></text>
 <rect x="1390" y="250" width="270" height="240" rx="14" fill="#fff" stroke="#6b7280" stroke-width="2.2"/>
 <text x="1406" y="284" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="21" font-weight="bold" fill="#12263a" text-anchor="start"><tspan>Capture conflicts</tspan></text>
 <text x="1406" y="306" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="13" font-weight="normal" fill="#6b7280" text-anchor="start"><tspan>Phase 3 · main session</tspan></text>
@@ -79,6 +82,21 @@
 <path d="M1660,370 L1720,370" fill="none" stroke="#12263a" stroke-width="2.4" marker-end="url(#aN)"/>
 <path d="M1990,370 L2050,370" fill="none" stroke="#12263a" stroke-width="2.4" marker-end="url(#aN)"/>
 <path d="M2320,370 L2380,370" fill="none" stroke="#12263a" stroke-width="2.4" marker-end="url(#aN)"/>
+<rect x="1060" y="530" width="200" height="124" rx="10" fill="#fdebc8" stroke="#e8a33d" stroke-width="2.6"/>
+<text x="1076" y="564" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="21" font-weight="bold" fill="#9a5b00" text-anchor="start"><tspan>Check in, build</tspan></text>
+<text x="1076" y="599" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#4a3200" text-anchor="start"><tspan>check in the two version</tspan></text>
+<text x="1076" y="620" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#4a3200" text-anchor="start"><tspan>files, then kick off the</tspan></text>
+<text x="1076" y="641" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#4a3200" text-anchor="start"><tspan>Bamboo build</tspan></text>
+<path d="M1100,490 L1100,530" fill="none" stroke="#e8a33d" stroke-width="2.4" marker-end="url(#aA)"/>
+<path d="M1210,530 L1210,490" fill="none" stroke="#e8a33d" stroke-width="2.4" marker-end="url(#aA)"/>
+<text x="1092" y="516" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#9a5b00" text-anchor="end"><tspan>check in</tspan></text>
+<text x="1218" y="516" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#9a5b00" text-anchor="start"><tspan>build done</tspan></text>
+<rect x="1390" y="530" width="270" height="124" rx="10" fill="#f8e1dd" stroke="#c0392b" stroke-width="2.4" stroke-dasharray="8 6"/>
+<text x="1406" y="564" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="21" font-weight="bold" fill="#c0392b" text-anchor="start"><tspan>STUCK, escalate</tspan></text>
+<text x="1406" y="599" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>a setup or migrate step failed:</tspan></text>
+<text x="1406" y="620" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan>which command, why, tried</tspan></text>
+<text x="1406" y="641" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" fill="#12263a" text-anchor="start"><tspan font-family="Consolas, 'Courier New', monospace" font-size="13">stuck-deploy.md</tspan><tspan> → you decide</tspan></text>
+<path d="M1300,490 L1300,572 L1390,572" fill="none" stroke="#c0392b" stroke-width="2.4" stroke-dasharray="8 6" marker-end="url(#aR)"/>
 <path d="M2265,250 L2265,220 L2105,220 L2105,250" fill="none" stroke="#12263a" stroke-width="2.4" marker-end="url(#aN)"/>
 <text x="2185" y="212" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="12" font-weight="bold" fill="#12263a" text-anchor="middle"><tspan>redeploy </tspan><tspan font-family="Consolas, 'Courier New', monospace" font-size="11">setup</tspan><tspan> → re-capture, max 3</tspan></text>
 <rect x="1720" y="530" width="270" height="104" rx="10" fill="#f8e1dd" stroke="#c0392b" stroke-width="2.4" stroke-dasharray="8 6"/>
