@@ -14,7 +14,7 @@ Generic across customers. Customer-specific values come from the project and `~/
 
 **Subagent return contract.** Every subagent ends with one status: DONE, NEEDS_DECISION, NEEDS_SERVER_ACTION (with the exact commands) or STUCK (with evidence). `upgrade-test-author` also returns CASES_READY, NEEDS_RECORDING and NEEDS_DISCOVERY. Only the orchestrator writes `state.json`.
 
-State lives in `.upgrade/state.json`. Minimum fields (all three upgrade commands rely on them): `ticket` (the upgrade parent Jira key), `jiraProject`, `versions` (current, target, base), `rollbackRevision`, `targetBox`, `distZips` (old, new), `previousUnitSuite` (path or none), `people` (engineer, qa), `authorisation` (`setup` true or false, `box`, `date`, `source`), `phase`, `gates` (A-D, with dates), `redeploys` (used, cap 5), `fixIterations` (used, cap 3, before the check-in), `qaFixIterations` (used, cap 3, for QA defects after it), `checkInRevision`, and the locations of `unitResults` and `qaResults`. Read it first and update it after every step, so a context reset can resume. Artifacts go in `.upgrade/`. Subagents read `~/.claude/upgrade/gotchas.md` first.
+State lives in `.upgrade/state.json`. Minimum fields (all three upgrade commands rely on them): `ticket` (the upgrade parent Jira key), `jiraProject`, `versions` (current, target, base), `rollbackRevision`, `targetBox`, `distZips` (old, new), `previousUnitSuite` (path or none), `people` (engineer, qa), `authorisation` (`setup` true or false, `box`, `date`, `source`), `phase`, `gates` (A-D, with dates), `redeploys` (used, cap 5), `fixIterations` (used, cap 3, before the check-in), `qaFixIterations` (used, cap 3, for QA defects after it), `checkInRevision`, and the locations of `unitResults`, `qaResults` and `conflictReport`. Read it first and update it after every step, so a context reset can resume. Artifacts go in `.upgrade/`. Subagents read `~/.claude/upgrade/gotchas.md` first.
 
 ## Phase 0 - Preflight
 1. This command needs the agent-loop kit (`/setup-project`, `loop-verify.sh`, the `e2sc-ui_tests` harness template, `~/.claude/loop/servers.md`). If any is missing, stop and tell the engineer to install it. The project must have a row in `servers.md`; if not, stop and ask for `/setup-project`.
@@ -55,7 +55,20 @@ The merge happens as part of deployment: conflicts only appear once the target p
 
 ## Phase 4 - Resolve conflicts
 Delegate to the `upgrade-merger` subagent with `.upgrade/conflicts.md`. It resolves each conflict in the working copy using the old platform, new platform and customer versions. Then redeploy with plain `setup` (authorised above; the install and seed data are kept) and re-capture as in Phase 3. After each redeploy run the smoke check. Repeat until no conflicts remain, max 3 rounds. Unresolved high-risk conflicts go to the engineer; don't continue past them. Count each redeploy in state.
-When no conflicts remain: Phase 5 (continue here, or run `/upgrade-validate <JIRA-KEY>` in a fresh session).
+When no conflicts remain: Phase 4b, then Phase 5 (continue here, or run `/upgrade-validate <JIRA-KEY>` in a fresh session).
+
+## Phase 4b - Conflict report (after the deployment succeeds)
+Runs once, after the last resolve round's redeploy has succeeded and the smoke check is clean. It is a read-only summary of what the deployment reported and what the merge did, so the engineer and QA can see it without reading the working files.
+1. Build `.upgrade/conflict-report.html` from `conflicts.md`, `merge-log.md`, `assessment.json` and `iterations.md` (if present). One self-contained HTML file (inline CSS, no external scripts, readable in light and dark mode). Contents:
+   - header: ticket, current -> target version, target box, date, and the redeploy count used
+   - summary counts: conflicts captured, merged, left for the engineer, and by risk (HIGH / MEDIUM / LOW)
+   - table of **conflicts** (file, component, risk, ticket key, what conflicted, and the round it was first seen in)
+   - table of **merged conflicts** (file, assessment id, how it was resolved, which side(s) were kept, ticket key)
+   - any conflict still open, with the reason and who must decide
+   - the final deployment and smoke-check result
+   No credentials, hostnames beyond the box name, or log extracts.
+2. Record the path in state (`conflictReport`) and list it in `report.md` (Phase 7).
+3. Share it: give the engineer the path and, when the engineer says so, attach it to the parent ticket or send it to QA so they can plan their regression. Don't publish it anywhere yourself, and never transition tickets.
 
 ## Phase 5 - Playwright unit tests -> GATE C (engineer)
 Defined in `/upgrade-validate` (Phases 5-7). Read `~/.claude/commands/upgrade-validate.md` and follow its Phase 5 here, or tell the engineer to run `/upgrade-validate <JIRA-KEY>` in a fresh session (cheaper: everything it needs is in `.upgrade/` and `.loop/`). In short: after the merge, `upgrade-test-author` drafts the unit-test cases and the engineer approves them (Gate C), then it writes the Playwright tests, and the first run of `loop-verify.sh <TICKET>-unit` on the target box is recorded. Failures are not fixed here: Phase 6 owns the fix loop. It runs on every upgrade.
