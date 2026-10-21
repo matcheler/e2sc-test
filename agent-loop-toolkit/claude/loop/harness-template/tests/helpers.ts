@@ -1,4 +1,4 @@
-import { Page, Frame, Download } from '@playwright/test';
+import { Page, Frame, Download, expect } from '@playwright/test';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -54,6 +54,10 @@ export async function loginAsSuper(page: Page): Promise<void> {
   if (await loginButton.isVisible().catch(() => false)) {
     await loginButton.first().click();
   }
+
+  // Let the home page settle before callers open the menu: a menu click made while home.do is
+  // still initialising can be silently dropped. Never fails the login itself.
+  await page.waitForURL(/\/e2sc\/home\.do/, { timeout: 30000, waitUntil: 'load' }).catch(() => {});
 }
 
 // ---------------------------------------------------------------------------
@@ -115,21 +119,54 @@ export async function navigateToMenuItem(page: Page, group: string, heading: str
     throw new Error(`Unknown item "${item}" under "${group} > ${heading}". Valid: ${Object.keys(section.items).join(', ')}`);
   }
 
-  await openMenuGroup(page, group);
+  // A menu click can be silently dropped while the page is still initialising (rcp_content stays on
+  // blank.html). Retry, bounded, until rcp_content navigates to a real page. If it never does
+  // (e.g. an item that opens outside rcp_content), behave as before and leave it to the caller's checks.
+  let navigated = false;
+  const onNav = (f: Frame) => {
+    if (f.name() === 'rcp_content' && !/\/blank\.html(\?|#|$)/.test(f.url())) navigated = true;
+  };
+  page.on('framenavigated', onNav);
+  try {
+    for (let attempt = 1; attempt <= MENU_NAV_ATTEMPTS; attempt++) {
+      const groupButton = page.getByRole('button', { name: group, exact: true }).first();
+      if (attempt > 1 && (await groupButton.isVisible().catch(() => false))) {
+        await groupButton.click(); // menu still open from the dropped attempt: don't toggle it shut
+      } else {
+        await openMenuGroup(page, group);
+      }
 
-  const link = page
-    .locator('.eto-header__menu-column:visible')
-    .nth(section.column - 1)
-    .locator(`:scope > ul:nth-of-type(${section.ul}) > li > .eto-menu__group > li:nth-child(${position}) > .eto-menu__link`);
-  const actualText = (await link.textContent())?.trim();
-  if (actualText && actualText !== item) {
-    throw new Error(
-      `Menu drift at "${group} > ${heading}" position ${position}: expected "${item}" but found "${actualText}". ` +
-        `Update MENU_MAP from the current application menu.`
-    );
+      const link = page
+        .locator('.eto-header__menu-column:visible')
+        .nth(section.column - 1)
+        .locator(`:scope > ul:nth-of-type(${section.ul}) > li > .eto-menu__group > li:nth-child(${position}) > .eto-menu__link`);
+      const actualText = (await link.textContent())?.trim();
+      if (actualText && actualText !== item) {
+        throw new Error(
+          `Menu drift at "${group} > ${heading}" position ${position}: expected "${item}" but found "${actualText}". ` +
+            `Update MENU_MAP from the current application menu.`
+        );
+      }
+      await link.click();
+
+      const ok = await expect
+        .poll(() => navigated, { timeout: MENU_NAV_TIMEOUT_MS })
+        .toBe(true)
+        .then(
+          () => true,
+          () => false
+        );
+      if (ok) return;
+      console.log(`navigateToMenuItem: "${group} > ${heading} > ${item}" did not load rcp_content (attempt ${attempt}/${MENU_NAV_ATTEMPTS})`);
+    }
+  } finally {
+    page.off('framenavigated', onNav);
   }
-  await link.click();
 }
+
+/** Bounded retry for a dropped menu click (see navigateToMenuItem). */
+const MENU_NAV_ATTEMPTS = 3;
+const MENU_NAV_TIMEOUT_MS = 20000;
 
 // ---------------------------------------------------------------------------
 // iframe access

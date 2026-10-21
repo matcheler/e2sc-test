@@ -26,6 +26,9 @@ Jira access: `node ~/.claude/scripts/jira.js <get|comment|edit-comment|transitio
      copy already has modified files, list them to the user so they aren't confused with this
      ticket's changes later.
    - If there is a cookie file inside the working copy, warn that it must not be committed.
+   - **Check the Jira cookie before delegating:** run `node ~/.claude/scripts/jira.js transitions <KEY>`.
+     If it exits with JIRA_AUTH_EXPIRED, stop and ask the user to refresh the cookie (see above). Don't
+     start intake first: a failed intake run wastes minutes.
 2. Delegate to the ticket-intake subagent with this ticket key.
 3. If NOT_READY: post its questions as a Jira comment, worded for the ticket's readers. Leave loop
    tooling questions (e.g. the missing harness) out of Jira and ask the user directly. Leave the status
@@ -40,7 +43,9 @@ Jira access: `node ~/.claude/scripts/jira.js <get|comment|edit-comment|transitio
 5. **Test cases: post, then wait for the user.**
    - Post the test-case table from `test-cases.md` as a Jira comment, with a line saying it is awaiting
      review. This needs no approval. Record the comment id in `.loop/<KEY>/`.
-   - Show the user the table, the "Not covered by Playwright" list and the questions. Ask them to reply
+   - Show the user the table, the "Not covered by Playwright" list and the questions. Where a case has
+     more than one route (see its **Route** field), show both with the cost note and ask which to use;
+     a route with an existing helper needs no new recording. Ask them to reply
      with **approve**, or with changes: cases to drop or add, the test data to use, and what is allowed
      for testing (e.g. inbox drops over SSH, reading server logs, a named record).
    - Stop and wait. Do not write any Playwright code until the user approves in this conversation. A
@@ -54,17 +59,24 @@ Jira access: `node ~/.claude/scripts/jira.js <get|comment|edit-comment|transitio
    approved cases only.
    - If it returns NEEDS_RECORDING, show the user each requested flow from
      `.loop/<KEY>/recording-requests.md`: its name, the steps to click through, what to assert, and the
-     exact `npx playwright codegen --output ...` command. You may launch codegen for the user in the
-     background when they ask; it exits when they close the browser.
-   - Wait for the user. Check that every requested `e2sc-ui_tests/recordings/<KEY>/<flow>.ts` exists and
-     isn't empty. If a recording stops short (e.g. at a popup), capture the rest with a throwaway
-     spec in `tests/_discovery/` rather than asking again.
-     - Don't do the replay in this session: its trial runs and logs fill the main context. Delegate it
-       to a general-purpose subagent with `model: sonnet`. Give it the recording path, where the
-       recording stops, what is still needed, and the harness rules (the e2sc-playwright skill, no fixed
-       delays, read-only on the shared server).
-     - Have it write the steps and locators it found to `.loop/<KEY>/discovery-<flow>.md`, and reply
-       only with that path and whether it succeeded. Pass that file to test-author.
+     command `node ~/.claude/scripts/loop-record.js <KEY> <flow>`. It launches codegen with the right
+     URL, prints the steps, never overwrites an earlier recording and checks the result when the browser
+     closes. You may launch it for the user in the background when they ask.
+   - Wait for the user. Check each requested recording with
+     `node ~/.claude/scripts/loop-record.js <KEY> <flow> --check`. It fails if the file is missing or
+     empty, has no assertion, doesn't end on an assertion (the recording stops before the result screen),
+     or its login step types something other than a username (for example a pasted path).
+   - **If a screen or part of a flow is unknown, or a recording stops short of what the cases need, ask
+     the user for another `playwright codegen` recording. Don't discover it by trial runs.** Trial runs on
+     the shared dev server are slow, and a discovery run on one ticket took 40+ minutes.
+     - Say where the previous recording stopped, and give the steps to continue from there: what to
+       click, what to wait for, and which element to assert. Give a new command with its own `--output` file.
+     - Only if the user says to fill a small gap by script instead, delegate a throwaway spec in
+       `tests/_discovery/` to a general-purpose subagent with `model: sonnet`. Give it a budget (at most 6
+       trial runs or 10 minutes), have it append a line per trial with its duration to
+       `.loop/<KEY>/discovery-progress.md`, and have it report what it found when the budget is spent.
+       Don't add scope to a running agent: queue it as a second task. It writes the steps and locators to
+       `.loop/<KEY>/discovery-<flow>.md` and replies only with that path and whether it succeeded.
    - Resume the same test-author agent (SendMessage) with the recordings and any user fixtures. Repeat
      if it asks for more recordings.
    - Before resuming, check fixtures the user provides (e.g. inbound flat files): field count and index

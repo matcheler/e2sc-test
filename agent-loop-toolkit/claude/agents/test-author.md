@@ -28,10 +28,12 @@ Given the intake brief at `.loop/<TICKET>/intake.md`, write `.loop/<TICKET>/test
    - **Don't re-prove existing coverage.** If an existing test in `e2sc-ui_tests/tests/` or an earlier ticket's locked tests already prove a behaviour, cite it in the row and leave it out.
    - **Optional means a distinct path that is nice to have.** Anything that exercises the defect's own dimension (e.g. the quantity that is miscounted) is not optional. Don't pad with optional cases that duplicate approved ones.
    - **Keep the floor:** every acceptance criterion has at least one UNIT-UI case that can fail before the change and pass after it, or is listed under "Not covered by Playwright" with the reason (end-to-end, left to QA; or logic-unit with no runner yet).
-   - **B2B drops only when specified.** Propose a case that drops a file into an inbox only if the **B2B upload verification** field in `intake.md` says `specified`. Otherwise list the case as left to QA.
+   - **Choose the route by where the result can be seen, and prefer a route that already has a helper.** If the result lives in `e2na.log` or a download and not on a screen, don't add a UI upload on top: use the route that already has a helper (look in `e2sc-ui_tests/tests/` for a drop-and-log or read-back helper), so no new screen needs recording. A new UI flow costs a recording and slow runs, so pick it only when the ticket is about that screen. Where two routes exist, name both in the case's **Route** with a one-line cost note, and let the human choose at approval.
+   - **B2B inbox drops.** Propose one when the **B2B upload verification** field in `intake.md` says `specified`, or when the route rule above picks it because the result is only visible in `e2na.log` and a drop helper exists. Either way `cases.approved` must allow it. Otherwise list the case as left to QA.
 2. Give each case one row in a table:
    - **ID**, e.g. `TC1`, and the criterion it proves, e.g. `AC2`
    - **Level:** UNIT-UI or UNIT-LOGIC
+   - **Route:** how the test acts and where it reads the result (for example Excel upload screen then download read-back, or inbox drop then `e2na.log`), plus the other route and its cost if there is one
    - **Type:** happy, boundary or negative
    - **Distinct because:** the branch, input shape or state this case exercises that no other case does. If you can't fill this in, merge the case into another or drop it.
    - **Precondition and data:** which record, file or fixture it needs, and whether it creates data (unique values) or relies on existing data
@@ -54,12 +56,13 @@ Write exactly the approved UNIT-UI cases: no more, no fewer. Don't write UNIT-LO
 0. Recordings first. Base selectors and navigation on flows a human has recorded with Playwright codegen, not on guesses.
    - Recordings live in `e2sc-ui_tests/recordings/<TICKET>/<flow>.ts`.
    - Decide which UI flows the approved cases need recorded, e.g. "open PIT Detail for a given record" or "run the Excel download for a given search". Share one flow across cases where you can.
-   - If any are missing, write `.loop/<TICKET>/recording-requests.md` and return NEEDS_RECORDING with the same list, then stop without writing tests. For each flow, give:
+   - **Don't explore a screen yourself.** If a screen, or part of a flow (such as where an upload's result appears), isn't covered by an existing recording, discovery spec or helper, ask for a recording. Don't write trial specs to find it out: runs on the shared server are slow. A recording must reach the screen the test asserts on, including the result screen of an action, not stop at the click that triggers it. If a recording stops short of that, request a follow-up that continues from where it stopped.
+   - If any are missing or incomplete, write `.loop/<TICKET>/recording-requests.md` and return NEEDS_RECORDING with the same list, then stop without writing tests. For each flow, give:
      - a short name (the file name)
      - the cases it supports
      - the exact steps for the human to click through, including which record or data to open and where to stop
      - what to capture: to record an assertion, use the codegen toolbar's "Assert visibility" or "Assert text" on the element the test will check
-     - the command to run from `e2sc-ui_tests/`: `npx playwright codegen --output recordings/<TICKET>/<flow>.ts <baseURL>/e2sc/logon.do`. Take `<baseURL>` from `playwright.config.ts`.
+     - the command to run from the project root: `node ~/.claude/scripts/loop-record.js <TICKET> <flow>`. It launches codegen with the right URL, prints these steps, never overwrites an earlier recording, and checks the recording when the browser closes. State in the steps where to stop: on the result screen, with an assertion.
    - When you are resumed and the recordings exist, read them, and any `.loop/<TICKET>/discovery-*.md` files. Reuse their navigation and locators, but wrap them in the harness helpers (`loginAsSuper`, `getRcpFrame`) and replace hard-coded data with unique test values. Recordings are reference material: never import or run them from locked tests.
    - If a recording shows the flow differs from the approved case (a missing menu item, a different screen), report it rather than working around it.
 1. Write one test per approved case. Name it with the case and criterion IDs, for example `TC3 (AC2): Month column is shown in PIT Detail`.
@@ -76,7 +79,7 @@ Reply only with `TESTS_READY` or `NEEDS_RECORDING`, the spec file paths or reque
 ## Upload cases (UI Excel upload, B2B drop)
 An upload can be a case, as long as it stays unit-scope: setup uploads are fine, but there is one action under test and one outcome.
 - **Excel upload through the UI** needs Playwright. Record the upload screen flow once (NEEDS_RECORDING) and drive the file input with `setInputFiles` inside the `rcp_content` frame.
-- **B2B drop** (a file scp'd into the inbox over SSH) only when `intake.md` says B2B upload verification is `specified` and `cases.approved` allows inbox drops. Follow "Raw B2B drops over SSH" below.
+- **B2B drop** (a file scp'd into the inbox over SSH) when `intake.md` says B2B upload verification is `specified`, or when the route rule in CASES mode picked it because the result is only visible in `e2na.log`. `cases.approved` must allow inbox drops. Reuse the existing drop-and-log helper in `e2sc-ui_tests/tests/` and follow "Raw B2B drops over SSH" below.
 - **Build the file at run time** with the harness's `tests/upload-fixtures.ts` (import it from `../../upload-fixtures`), not by editing a fixture:
   - keep a template in `fixtures/<TICKET>/`; write the result to `fixtures/<TICKET>/generated/`
   - `buildXlsxFromTemplate` for Excel, `fillTemplateText` with `{{TOKEN}}` placeholders for a flat file

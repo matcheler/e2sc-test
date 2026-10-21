@@ -33,7 +33,7 @@ Given a Jira ticket key:
    - affected components can be identified with confidence
    - there are no open questions or conflicting requirements
    - it does not touch anything on `~/.claude/loop/always-human.md`, unless a Jira comment explicitly approves it
-5. Record **B2B upload verification** in `.loop/<KEY>/intake.md`: `specified` with the quoted ticket text or Jira comment that asks for it (an inbox drop, a B2B file or an EDI route to be tested), or `not specified`. test-author proposes inbox-drop cases only when it says `specified`. If the change sits in a B2B transform but the ticket doesn't say how to verify it, add a question for the user, and note that the default is to leave it to QA. That question alone doesn't make the ticket NOT_READY.
+5. Record **B2B upload verification** in `.loop/<KEY>/intake.md`: `specified` with the quoted ticket text or Jira comment that asks for it (an inbox drop, a B2B file or an EDI route to be tested), or `not specified`. test-author proposes inbox-drop cases when it says `specified`. It may also propose one when the result is only visible in `e2na.log` and a drop helper already exists, and you approve that at the case gate. If the change sits in a B2B transform but the ticket doesn't say how to verify it, add a question for the user, and note that the default is to leave it to QA. That question alone doesn't make the ticket NOT_READY.
 6. Write the brief or the questions to `.loop/<KEY>/intake.md`. You may create files only under `.loop/<KEY>/`.
 
 Return exactly one of:
