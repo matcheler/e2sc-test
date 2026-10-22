@@ -4,7 +4,7 @@
 const { chromium } = require(process.argv[2]);
 (async () => {
   const browser = await chromium.launch();
-  const page = await browser.newPage({ viewport: { width: 1580, height: 900 }, deviceScaleFactor: 2 });
+  const page = await browser.newPage({ viewport: { width: 2000, height: 1000 }, deviceScaleFactor: 2 });
   await page.goto('file:///' + process.argv[3].replace(/\\/g, '/'));
   const box = await page.locator('#c').boundingBox();
   await page.screenshot({ path: process.argv[4], clip: { x: 0, y: 0, width: Math.ceil(box.width), height: Math.ceil(box.height) } });

@@ -30,7 +30,7 @@ export default defineConfig({
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
-    actionTimeout: 20000,
+    actionTimeout: Number(process.env.E2_ACTION_TIMEOUT) || 20000,
     navigationTimeout: 30000,
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],

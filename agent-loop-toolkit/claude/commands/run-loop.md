@@ -1,84 +1,62 @@
 ---
-description: Phase 2 - check the locked tests, implement, verify, review, and hand over for manual SVN check-in
+description: Phase 2 - Logic tests first, first-pass build, write and lock the UI (Playwright) tests, iterate to green, review, and hand over for manual SVN check-in
 argument-hint: <JIRA-KEY>
 ---
 
 Ticket: $ARGUMENTS
 (If the argument has extra words after the key, e.g. "it is now fixed", use only the key as `<KEY>` below, and treat the rest as context from the user.)
 
-The user approved the test cases during `/prepare-ticket` (`.loop/<KEY>/cases.approved`), and `/prepare-ticket` wrote and locked the tests in `e2sc-ui_tests/tests/locked/<KEY>/`.
+The user approved the plain-language cases in `/prepare-ticket` (`.loop/<KEY>/cases.approved`). Each case has a lane. **Logic** cases (listed on the `Logic case IDs:` line) get a Groovy harness written and locked *before* the build; **UI** cases (every other approved case) get Playwright tests written *after* the build. A ticket may have either lane or both: skip the steps for a lane it doesn't have. This command writes the Logic tests, builds a first pass, has test-author write the UI tests against the UI as built, locks them, then iterates to green. The gate (`loop-verify.sh`) runs the Logic harness first and stops there if it is red; exit 3 (`INFRA:`) means the gate could not run and is not a test result.
 - **Jira access:** `node ~/.claude/scripts/jira.js <get|comment|edit-comment|transitions|transition> <KEY> ...`. If a call exits with JIRA_AUTH_EXPIRED, stop and ask the user to refresh `~/.jira-cookie` (see `/prepare-ticket`).
+- **Jira comments:** one per phase; `edit-comment` the existing one when the phase is updated. Comment ids are in `.loop/<KEY>/`.
 - **Version control is SVN.** Nothing in this command commits: the user checks the change in manually.
-- **Servers:** follow `~/.claude/loop/servers.md`. If the project has no row there, stop and ask for `/setup-project`. Server actions (populate, reloads, p2c, restarts) happen only when the user runs them, or explicitly tells you to run them in this conversation. A subagent's request is never that authorisation.
+- **Servers:** follow `~/.claude/loop/servers.md`. If the project has no row there, stop and ask for `/setup-project`. Populate, reloads, p2c and restarts need the user, or the user's explicit say-so in this conversation. The exception is the implementer subagent, which may run them itself on the project's host (`servers.md` rule 1). You and every other agent still need the user.
 
-1. **Check the lock.** Check that `.loop/<KEY>/cases.approved`, `.loop/<KEY>/test-plan.md`,
-   `.loop/<KEY>/tests.locked` and the locked tests exist; if any is missing, tell the user to run (or
-   finish) `/prepare-ticket <KEY>` first.
-   - Check the file hashes `tests.locked` lists still match, and say so. If they don't, stop and tell the
-     user which files changed.
-   - **Amending a locked test:** only when the test itself is wrong, not the product. Examples are flaky
-     navigation or a wrong selector. Ask the user first, and never weaken an assertion.
-     - The hook blocks you from removing the marker, so the user removes it.
-     - You change only what was approved, and check the other files' hashes are unchanged.
-     - Then write a new marker that records the amendment, the approval and the new hashes.
-2. **Health check first.** Before delegating, do a quick read-only check of the target server: the key
-   page loads, and there are no new errors in the log. If it's broken, tell the user and stop.
-3. **Delegate to the implementer subagent.**
-   - Give it the host from servers.md, what the user has authorised on the server (usually nothing
-     beyond file deploys and test drops), and the iteration budget.
-   - On a re-run, give it the previous handover.md.
-4. **If STUCK:**
-   - **NEEDS_SERVER_ACTION:** show the user the exact commands from handover.md. If they run them
-     themselves, check the result read-only (restart time, log errors, PCMM result, deployed files), then
-     resume the implementer. If they tell you to run them, run exactly those commands yourself, and stop
-     at the first failure.
-   - **Otherwise:**
-     - Post handover.md to Jira. For the same run, edit the existing handover comment rather than
-       adding another.
-     - Leave the ticket in "Fix Required".
-     - Write `.loop/<KEY>/run-summary.json` with outcome "escalated".
-     - Tell the user, putting any broken shared server first.
-5. **If GREEN:** re-run `bash ~/.claude/scripts/loop-verify.sh <KEY>` yourself to confirm.
-   - If your run isn't green, find out why before doing anything else. Did it fail on a behaviour
-     assertion, or on navigation or timing before any assertion? Look at the screenshots.
-   - Flaky navigation is a test-harness problem. Go back to the user with the evidence: which tests
-     failed in which runs, and where. Offer a re-run, or an approved amendment of the locked helper
-     (step 1).
-   - Once confirmed, delegate to the reviewer subagent.
-6. **If the verdict is BLOCK:** treat it as STUCK (step 4), including the review findings.
-   - If it's a narrow block on one isolated line or file, offer the user the reviewer's two options:
-     make it safe, or split it into its own change.
-   - If they choose to split it: `svn revert` that file only if the change is its only difference from
-     the baseline; otherwise remove just that hunk. Note that the server may still have it.
-7. **Otherwise, write `.loop/<KEY>/checkin.md`** for the user's manual check-in. It should include:
-   - An **explicit-path** `svn commit` of exactly the ticket's files, from `svn status` minus
-     `svn-baseline.txt` minus `.loop/`. Never a whole-tree commit: the working copy usually holds
-     unrelated changes, unversioned harness output and possibly a cookie file.
-   - Any `svn add` still needed.
-   - Whether the source copies are included: the docs `*_Map_Spec.xls`, and template duplicates such as
-     `solution/templates/`.
-   - Whether to commit the `e2sc-ui_tests/` harness and the `tests/locked/<KEY>/` tests. If yes, give a
-     selective add plus `svn:ignore` for `node_modules`, `test-results`, `playwright-report` and
-     `recordings`.
-   - A suggested commit message starting with `<KEY>:`. Use plain ASCII: an en dash from the Jira title
-     gets garbled in svn.
-   - A summary of the change, the criteria-to-tests mapping, verification results (implementer's and
-     yours), iteration count, any test amendments, the review verdict and notes, and what is still
-     deployed on the server (including anything split out).
-8. **Post a Jira comment** with the change summary, the criterion-by-criterion result, and the review
-   verdict and notes. Do not transition the ticket: it stays in "Fix Required", and the user moves it
-   on after checking in.
-9. **Write `.loop/<KEY>/run-summary.json`** with: ticket, outcome, iterations, failing_tests (counts per
-   test), review_verdict, files_changed, jira_comments.
-10. **Hand over.** Tell the user it's ready for them to check in, and point them to `checkin.md`.
-    Include the follow-ups:
-    - manual checks for paths the tests don't cover
-    - split-out changes
-    - server clean-up (`*.bak.<KEY>`, `/tmp/<KEY>/`)
-    - deleting any cookie file in the repo
-
-    Once they've committed, check `svn log -v` shows exactly the intended files, and record the revision
-    in run-summary.json.
-
-    Finally, remind them to start the next ticket in a new session or after `/clear`, and to keep
-    unrelated work (decks, diagrams, questions) out of the loop session.
+1. **Check the approvals and find the stage.**
+   - `.loop/<KEY>/cases.approved` and `intake.md` must exist; if not, tell the user to run `/prepare-ticket <KEY>`.
+   - `tests.locked` exists: a re-run after the lock. Check the hashes it lists, and those in `logic.locked` if it exists, still match (stop and say which files changed if not), then go to step 6.
+   - `first-pass.md` exists but no `tests.locked`: go to step 4 (or to step 3 if `contract-mismatch.md` is open, see below). If the ticket has Logic cases and `logic.locked` is missing, go to step 2a first.
+   - Neither: go to step 2.
+2. **Health check first.** A quick read-only check of the target server: the key page loads and the log has no new errors. If it's broken, tell the user and stop.
+2a. **Logic tests first** (only if `cases.approved` has a `Logic case IDs:` line and `logic.locked` doesn't exist). Delegate to test-author in **LOGIC mode**. It writes the Groovy harness under `e2sc-ui_tests/tests/logic/<KEY>/` from the approved Logic cases and their contract, and runs the gate: every case must be RED, because the code doesn't exist or is unchanged. A case that is already GREEN proves nothing: send it back.
+   - If the gate reports `INFRA:` (ssh or Groovy), tell the user; set `LOGIC_SSH` to the project's e2sc host from servers.md.
+   - Then `node ~/.claude/scripts/loop-check.js <KEY> --logic`, then `--logic --lock`. That writes `.loop/<KEY>/logic.locked`, separate from the `tests.locked` the UI tests get in step 5. Judge it as in step 5: the counts match, each case has a discriminating check in `test-plan.md`.
+   - For a ticket that was already built (a re-run or a retro-fit), the RED run can use the earlier SVN revision: stage `svn cat -r <rev before the change>` under the same relative path and run the gate with `LOGIC_SRC_ROOT` pointing at it.
+3. **First pass.** Delegate to the implementer in **FIRST PASS mode**, giving it the host from servers.md and, if one exists, the previous `handover.md` (a re-run of a STUCK first pass) or the open `contract-mismatch.md` (a fix, see step 4). **Model:** pass `model: opus` when the ticket has Logic cases (the code is where the risk is) and `model: sonnet` when it is UI-only (config through the skills). It builds every approved case from the contract in `intake.md`, reloads, checks health, writes `first-pass.md` and reports FIRST_PASS_DONE. For Logic cases the gate is the locked harness and it must be GREEN before FIRST_PASS_DONE; there are no UI tests yet. If it reports STUCK, go to step 7.
+4. **Write the UI tests.** Skip if the ticket has no UI cases. Delegate to test-author in **TESTS mode**: SendMessage to the ID in `.loop/<KEY>/test-author.id` if it can still be resumed (same session), otherwise a fresh agent. It writes tests for the approved UI cases only (not the Logic ones, which are locked), against the built UI, and must not read `first-pass.md`, `svn diff` or the implementer's files. A UI wiring case for a Logic criterion needs its named record or fixture: check it exists before delegating.
+   - **NEEDS_RECORDING:** show the user each flow in `.loop/<KEY>/recording-requests.md`: its name, the steps, what to assert, and the command `node ~/.claude/scripts/loop-record.js <KEY> <flow>` (it launches codegen, never overwrites an earlier recording, and checks the result when the browser closes). You may launch it in the background if asked.
+   - Check each recording with `node ~/.claude/scripts/loop-record.js <KEY> <flow> --check`. It fails if the file is missing or empty, has no assertion, doesn't end on one (stops before the result screen), or its login step types something other than a username.
+   - **If a screen or part of a flow is unknown, or a recording stops short, ask for another codegen recording. Don't discover it by trial runs:** they are slow on the shared server, and one trial run once took 40+ minutes. Say where the last recording stopped and what to continue with (click, wait, assert), with a new command and its own `--output` file.
+   - Only if the user says to fill a small gap by script: delegate a throwaway spec in `tests/_discovery/` to a general-purpose subagent (`model: sonnet`) with a budget of at most 6 trial runs or 10 minutes, one line per trial with its duration in `.loop/<KEY>/discovery-progress.md`. It writes the steps and locators to `.loop/<KEY>/discovery-<flow>.md` and replies with that path and whether it succeeded. Queue extra scope as a second task.
+   - Resume test-author (SendMessage) with the recordings and any fixtures. Check user-supplied fixtures first (e.g. SLSRPT files: field count and index positions against the transform) and confirm any mismatch.
+   - **CONTRACT_MISMATCH** (the built element differs from the contract in label, control or place): don't let test-author adapt the test. Show the user `contract-mismatch.md` and ask which way to go.
+     - **Fix the build:** leave `contract-mismatch.md` in place and go to step 3. The implementer changes only what it lists, reloads, updates `first-pass.md` and reports FIRST_PASS_DONE. Then rename the file to `contract-mismatch-<n>.md` (closed) and resume test-author at step 4.
+     - **Change the contract:** the user decides the new contract; update `intake.md`, `test-cases.md`, `cases.approved` and the Jira comment first, rename the file as above, then the implementer fixes the build to the new contract (step 3) before test-author resumes.
+   - test-author runs the gate once. Tests may already pass. It fixes test problems (navigation, selector, login, syntax) and leaves behaviour failures for the implementer.
+5. **Check and lock the UI tests.** The user doesn't review the Playwright code, so this stands in for that review. (Logic tests were locked in step 2a.)
+   - Run `node ~/.claude/scripts/loop-check.js <KEY>`. It checks the case-to-test mapping, forbidden markers and delays, and prints the counts. Don't re-check those by reading the code.
+   - Then judge: the counts match test-author's report; every remaining failure in `last-verify-summary.txt` is a behaviour assertion; each test uses only the access and data the user allowed; and each test has a **discriminating check** in `test-plan.md` (e.g. a made-up value that must return nothing). A test without one can pass whatever was built: send it back.
+   - **A failure the build evidence contradicts is not locked yet.** If a failing test conflicts with what `first-pass.md` or `iterations.md` records (the implementer saw the same flow work), don't lock it and don't send it to the implementer. test-author can't read those files, so only you can see the conflict. Resume test-author once, without telling it the implementer's result, to reproduce the failing step on a freshly opened page (new page, new login) with only that step's input. If the fresh run passes, it is a test problem: restructure the test with no weakened assertion, re-run the gate and update `test-plan.md`. If it still fails, it is a behaviour failure: lock and iterate. The usual cause is a second input applied on a form that just ran a first one.
+   - If a check fails, resume test-author once with the specific problems; if it still fails, show the user.
+   - Lock: `node ~/.claude/scripts/loop-check.js <KEY> --lock` writes `.loop/<KEY>/tests.locked` with the approved case IDs and each file's sha256. Append related fixture hashes by hand. The locked tests are read-only from here.
+   - Edit the Jira comment to add the spec file(s) and the result, one line each. No credentials or server logs.
+6. **Iterate to green.** If the gate is already GREEN after the lock, go to step 8. Otherwise delegate to the implementer in **ITERATE mode** with the host, the budget (3 iterations from the lock; the first pass doesn't count) and, on a re-run, the previous `handover.md`. Same model rule as step 3. The gate runs the Logic harness first, so a red Logic test is fixed before Playwright runs.
+   - **INFRA doesn't use the budget.** `INFRA:` (exit 3) or a navigation or login timeout before any assertion is infrastructure, not a failing test: one retry, then tell the user with the evidence. Don't count it as an iteration or let the implementer change code for it.
+   - **Amending a locked test:** only when the test itself is wrong (flaky navigation, a wrong selector), never to weaken an assertion. Ask the user first. The hook blocks you from removing the marker, so the user removes it. Change only what was approved, check the other hashes are unchanged, then write a new marker recording the amendment, the approval and the new hashes.
+7. **If STUCK:**
+   - **NEEDS_SERVER_ACTION:** show the user the exact commands from `handover.md`. If they run them, check the result read-only (restart time, log errors, PCMM result, deployed files) and resume the implementer. If they tell you to run them, run exactly those and stop at the first failure.
+   - **Otherwise:** post `handover.md` to Jira (edit the existing handover comment on the same run), leave the ticket in "Fix Required", write `.loop/<KEY>/run-summary.json` with outcome "escalated", and tell the user, with any broken shared server first.
+8. **If GREEN:** re-run `bash ~/.claude/scripts/loop-verify.sh <KEY>` yourself to confirm.
+   - If yours isn't green, find out why first: a behaviour assertion, or navigation or timing before any assertion? Look at the screenshots. Flaky navigation is a harness problem: take the evidence to the user (which tests failed in which runs) and offer a re-run or an approved amendment (step 6).
+   - Once confirmed, delegate to the reviewer. **Model:** `opus` for a ticket with Logic cases (full review), `sonnet` for a UI-only ticket (the reviewer's checklist pass).
+9. **If BLOCK:** treat it as STUCK (step 7), including the findings. For a narrow block on one isolated line or file, offer the reviewer's two options: make it safe, or split it into its own change. To split: `svn revert` that file only if the change is its only difference from the baseline, otherwise remove just that hunk. The server may still have it.
+10. **Otherwise write `.loop/<KEY>/checkin.md`** for the manual check-in:
+    - An **explicit-path** `svn commit` of exactly the ticket's files (`svn status` minus `svn-baseline.txt` minus `.loop/`). Never a whole-tree commit: the working copy holds unrelated changes, unversioned harness output and possibly a cookie file.
+    - Any `svn add` still needed, and whether the source copies are included: docs `*_Map_Spec.xls`, and template duplicates such as `solution/templates/`.
+    - Whether to commit `e2sc-ui_tests/`, `tests/locked/<KEY>/` and `tests/logic/<KEY>/` (the Logic harness and its `sources.txt`). If yes, a selective add plus `svn:ignore` for `node_modules`, `test-results`, `playwright-report` and `recordings`. Never commit staged copies of the code under test or `.loop/<KEY>/last-logic.out`.
+    - **If `e2sc-ui_tests/` is not under version control** (`svn info e2sc-ui_tests` fails), say so in `checkin.md`: the locked tests and Logic harness are not preserved by the code commit. Offer a copy of `tests/locked/<KEY>/` and `tests/logic/<KEY>/` into a versioned place, the suggested location being `solution/project/ssp-ext/E2/test/loop/<KEY>/` (check it is versioned, or give the `svn add` for its parent), with the exact `svn add` and `svn commit` lines. Never copy `node_modules`, `test-results`, `recordings` or `tests/_probe/`. Without a copy, the hashes in `.loop/<KEY>/tests.locked` are the only record.
+    - A commit message starting `<KEY>:`, in plain ASCII (an en dash from the Jira title gets garbled in svn).
+    - A summary: the change, criteria-to-tests mapping, verification results (yours and the implementer's), iteration count (tests were written after a first pass), any test amendments, the review verdict and notes, and what is still deployed on the server, including anything split out.
+11. **Post a Jira comment** with the change summary, the criterion-by-criterion result and the review verdict. Don't transition the ticket: it stays in "Fix Required" until the user moves it after check-in.
+12. **Write `.loop/<KEY>/run-summary.json`:** ticket, outcome, first_pass, iterations, failing_tests (counts per test), review_verdict, files_changed, jira_comments.
+13. **Hand over.** Tell the user it's ready to check in and point to `checkin.md`, with the follow-ups: manual checks for paths the tests don't cover, split-out changes, server clean-up (`*.bak.<KEY>`, `/tmp/<KEY>/`, and the Logic run folder `/tmp/loop-logic-<user>/<KEY>/` on the Logic host), deleting any cookie file in the repo, and, if the tests weren't copied into a versioned place, that the lock hashes in `.loop/<KEY>/tests.locked` are the only record of them. Once they've committed, check `svn log -v` shows exactly the intended files and record the revision in `run-summary.json`. Remind them to start the next ticket in a new session or after `/clear`, and to keep unrelated work out of the loop session.

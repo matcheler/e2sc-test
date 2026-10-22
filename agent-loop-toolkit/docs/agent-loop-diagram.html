@@ -4,7 +4,7 @@
   :root { --ink:#26333f; --muted:#5b6770; --teal:#1f7a70; --brown:#8a5a12; --you:#fdecd0; --youb:#e29a2b; --stop:#f8e1dc; --stopb:#c4503b; --exe:#e3f3f1; --exeb:#3a9d8f; --qa:#eef0f2; --qab:#7b8791; }
   * { box-sizing:border-box; }
   body { margin:0; background:#fff; font-family:"Segoe UI",Arial,sans-serif; color:var(--ink); }
-  #c { position:relative; width:1580px; height:640px; }
+  #c { position:relative; width:1700px; height:715px; }
   .box { position:absolute; border:2px solid var(--ink); border-radius:9px; background:#fff; padding:10px 11px; font-size:12px; line-height:1.32; }
   .box h3 { margin:0 0 6px; font:700 17px Consolas,"Courier New",monospace; }
   .box h3 small { font-weight:400; font-size:12px; color:var(--muted); }
@@ -26,106 +26,109 @@
 </style></head>
 <body><div id="c">
 
-<div class="cmd" style="left:20px;width:930px;top:1px">/prepare-ticket &lt;KEY&gt;</div>
-<div class="cmd" style="left:1120px;width:440px;top:1px">/run-loop &lt;KEY&gt;</div>
+<div class="cmd" style="left:20px;width:580px;top:1px">/prepare-ticket &lt;KEY&gt;</div>
+<div class="cmd" style="left:660px;width:1000px;top:1px">/run-loop &lt;KEY&gt; <span style="font-size:12px;font-weight:400;color:var(--muted)">(after /clear)</span></div>
 
-<!-- row 1: prepare-ticket -->
-<div class="box" style="left:20px;top:70px;width:185px;height:230px">
+<!-- prepare-ticket -->
+<div class="box" style="left:20px;top:70px;width:190px;height:240px">
   <h3>ticket-intake</h3>
-  <div class="lab">READS</div>Jira ticket + attachments<br>codebase
-  <div class="lab">WRITES</div><span class="mono">intake.md</span><br>READY or NOT_READY<br>B2B upload: specified or not<br>criteria left to QA
+  <div class="lab">READS</div>Jira ticket + attachments<br>codebase: answers facts itself
+  <div class="lab">WRITES</div><span class="mono">intake.md</span><br>READY or NOT_READY<br>max 5 business questions, each with a default<br>criteria left to QA
   <div class="lab" style="color:var(--brown)">ON READY</div>Jira: Open &rarr; Fix Required
 </div>
-<div class="box" style="left:235px;top:70px;width:195px;height:230px">
+<div class="box" style="left:255px;top:70px;width:200px;height:240px">
   <h3>test-author <small>CASES</small></h3>
   <div class="lab">READS</div><span class="mono">intake.md</span>
-  <div class="lab">WRITES</div><span class="mono">test-cases.md</span><br>plain-language, unit-scope<br>Level: UNIT-UI or UNIT-LOGIC<br>"Not covered" list: end-to-end checks left to QA
+  <div class="lab">WRITES</div><span class="mono">test-cases.md</span><br>plain-language, unit-scope<br>each case tagged <b>UI</b> or <b>Logic</b><br>Logic cases name the entry point, inputs and outputs<br>"Not covered" list: end-to-end checks left to QA
 </div>
-<div class="box you" style="left:460px;top:115px;width:100px;height:110px">
+<div class="box you" style="left:500px;top:115px;width:100px;height:110px">
   <h3 style="margin-bottom:8px">You</h3>approve or change test cases
 </div>
-<div class="box" style="left:590px;top:70px;width:200px;height:230px">
-  <h3>test-author <small>TESTS</small></h3>
-  <div class="lab">READS</div><span class="mono">cases.approved</span><br><span class="mono">recordings/&lt;KEY&gt;/</span>
-  <div class="lab">WRITES</div><span class="mono">tests/locked/&lt;KEY&gt;/</span><br>UNIT-UI cases only, one action under test<br>upload files built from templates<br><span class="mono">test-plan.md</span>
-</div>
-<div class="box" style="left:820px;top:70px;width:130px;height:230px">
-  <h3 style="font-size:15px">Check, lock</h3><small style="color:var(--muted)">main session</small>
-  <div style="margin-top:6px">1 test per case, fails for the right reason. Every AC has a RED test or is on the "not covered" list.</div>
-  <div class="mono" style="margin-top:8px;font-weight:700">tests.locked</div>
-</div>
 
-<!-- row 1: run-loop -->
-<div class="box" style="left:1140px;top:70px;width:200px;height:230px">
-  <h3>implementer</h3>
-  <div class="lab">READS</div>test-plan, failing spec,<br>verify digest
-  <div class="lab">CHANGES</div>config via e2sc-* skills<br><span class="mono">iterations.md</span>
-  <div class="exe"><b>EXECUTES</b><br>Unit-testing + Playwright test cases</div>
+<!-- run-loop -->
+<div class="box" style="left:660px;top:70px;width:210px;height:240px">
+  <h3>test-author <small>LOGIC</small></h3>
+  <div class="lab">READS</div><span class="mono">cases.approved</span><br>Logic contracts in <span class="mono">test-cases.md</span>
+  <div class="lab">WRITES</div><span class="mono">tests/logic/&lt;KEY&gt;/</span><br>Groovy harness, RED before any build<br>locked as <span class="mono">logic.locked</span>
+  <div class="exe"><b>EXECUTES</b> Groovy over ssh</div>
 </div>
-<div class="box" style="left:1370px;top:70px;width:190px;height:230px">
+<div class="box" style="left:915px;top:70px;width:340px;height:240px">
+  <h3>implementer <small>FIRST PASS, then ITERATE</small></h3>
+  <div class="lab">READS</div>first pass: intake, cases, contract<br>iterate: test-plan, first-pass, failing spec, verify digest
+  <div class="lab">CHANGES</div>every approved case via e2sc-* skills<br><span class="mono">first-pass.md</span>, <span class="mono">iterations.md</span>
+  <div class="lab">RUNS</div>reloads (PCMM first), p2c, restart, populate; health check
+  <div class="exe"><b>EXECUTES</b> first pass: Logic harness until GREEN<br>iterate: Logic harness, then locked UI tests</div>
+</div>
+<div class="box" style="left:1300px;top:70px;width:360px;height:240px">
   <h3>reviewer</h3>
   <div class="lab">READS</div>ticket, not the tests<br><span class="mono">svn diff</span> vs baseline<br>consumers of shared files
-  <div class="lab">WRITES</div><span class="mono">review.md</span><br>APPROVE / NOTES / BLOCK<br>(a narrow BLOCK: make it safe or split it out)
+  <div class="lab">CHECKS</div>duplicate rules in two places, harness coupling; full review on Logic tickets, a short one on UI-only
+  <div class="lab">WRITES</div><span class="mono">review.md</span><br>APPROVE / NOTES / BLOCK
 </div>
 
 <!-- row 2 -->
-<div class="box stop" style="left:20px;top:350px;width:185px;height:100px"><h3>Stop</h3>NOT_READY: questions posted to Jira, status unchanged</div>
-<div class="box plain" style="left:235px;top:350px;width:195px;height:100px"><h3 style="font-size:15px;font-family:'Segoe UI',Arial,sans-serif">Jira comment</h3>cases and the "not covered" list, awaiting review; edited in place</div>
-<div class="box you" style="left:590px;top:350px;width:200px;height:135px"><h3 style="margin-bottom:5px;font-size:15px">Unit-testing and Playwright test creation</h3>You record the UI flows the approved cases need with <span class="mono">playwright codegen</span>; the upload screen once</div>
-<div class="box stop" style="left:1140px;top:350px;width:200px;height:180px"><h3>Stuck</h3>Server action needed: you run the reload, populate or p2c, then the loop resumes.<br><br>Otherwise escalated: <span class="mono">handover.md</span> to Jira, ticket stays Fix Required</div>
-<div class="box you" style="left:1370px;top:350px;width:190px;height:100px"><h3 style="margin-bottom:5px">You check in</h3><span class="mono">svn commit</span> from <span class="mono">checkin.md</span>; Jira summary comment posted</div>
+<div class="box stop" style="left:20px;top:360px;width:190px;height:95px"><h3>Stop</h3>NOT_READY: questions posted to Jira, status unchanged</div>
+<div class="box plain" style="left:255px;top:360px;width:200px;height:95px"><h3 style="font-size:15px;font-family:'Segoe UI',Arial,sans-serif">Jira comment</h3>cases and the "not covered" list, awaiting review; edited in place</div>
+<div class="box you" style="left:660px;top:360px;width:180px;height:165px"><h3 style="margin-bottom:5px;font-size:14px;white-space:nowrap">Recording / mismatch</h3>You record only the screens not already in <span class="mono">INDEX.md</span>, with <span class="mono">playwright codegen</span>.<br>On a mismatch you decide whether the build or the contract changes.</div>
+<div class="box" style="left:920px;top:360px;width:210px;height:235px">
+  <h3>test-author <small>TESTS</small></h3>
+  <div class="lab">READS</div>UI cases, <span class="mono">INDEX.md</span>, recordings, the UI as built
+  <div class="lab">WRITES</div><span class="mono">tests/locked/&lt;KEY&gt;/</span><br>each with a discriminating check<br><span class="mono">test-plan.md</span>
+  <div class="lab" style="color:var(--brown)">REPLIES</div>TESTS_READY, NEEDS_RECORDING, CONTRACT_MISMATCH
+</div>
+<div class="box stop" style="left:1180px;top:360px;width:210px;height:185px"><h3>Stuck</h3>A failed reload, an unhealthy server, a locked test you think is wrong, or an action outside the implementer's authorisation: you act, then the loop resumes.<br><br>Otherwise <span class="mono">handover.md</span> to Jira, ticket stays Fix Required</div>
+<div class="box you" style="left:1440px;top:360px;width:220px;height:95px"><h3 style="margin-bottom:5px">You check in</h3><span class="mono">svn commit</span> from <span class="mono">checkin.md</span>; Jira summary comment posted</div>
 
 <!-- footer -->
-<div class="note" style="left:20px;top:560px;font-size:12px"><b>Once per machine:</b> <span class="mono">install.ps1</span> &nbsp;&middot;&nbsp; <b>Once per project:</b> <span class="mono">/setup-project</span> (harness, servers, access check)</div>
+<div class="note" style="left:20px;top:625px;font-size:12px"><b>Once per machine:</b> <span class="mono">install.ps1</span> &nbsp;&middot;&nbsp; <b>Once per project:</b> <span class="mono">/setup-project</span> (harness, servers, access check) &nbsp;&middot;&nbsp; <b>Logic lane:</b> set <span class="mono">LOGIC_SSH</span> to the project's e2sc host</div>
 
-<svg width="1580" height="640" viewBox="0 0 1580 640">
+<svg width="1700" height="715" viewBox="0 0 1700 715">
   <defs>
     <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#26333f"/></marker>
     <marker id="r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#c4503b"/></marker>
     <marker id="o" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#e29a2b"/></marker>
   </defs>
   <!-- braces -->
-  <path d="M20 54V38H950V54" fill="none" stroke="#26333f" stroke-width="2"/>
-  <path d="M1120 54V38H1560V54" fill="none" stroke="#26333f" stroke-width="2"/>
-  <!-- row 1 handoffs -->
+  <path d="M20 54V38H600V54" fill="none" stroke="#26333f" stroke-width="2"/>
+  <path d="M660 54V38H1660V54" fill="none" stroke="#26333f" stroke-width="2"/>
+  <!-- handoffs -->
   <g stroke="#26333f" stroke-width="2" fill="none" marker-end="url(#a)">
-    <path d="M205 185H233" marker-end="url(#a)"/><path d="M430 185H458"/><path d="M560 185H588"/><path d="M790 185H818"/>
-    <path d="M950 185H1138"/><path d="M1340 185H1368"/>
+    <path d="M210 190H253"/><path d="M455 190H498"/><path d="M600 190H658"/><path d="M870 190H913"/><path d="M1255 190H1298"/>
   </g>
-  <text x="1010" y="178" fill="#8a5a12">then /clear</text>
-  <text x="207" y="179" fill="#26333f" style="font-size:8px">READY</text>
-  <text x="1341" y="179" fill="#26333f" style="font-size:8px">GREEN</text>
+  <text x="219" y="178" fill="#26333f" style="font-size:9px">READY</text>
+  <text x="1262" y="178" fill="#26333f" style="font-size:9px">GREEN</text>
   <!-- implementer loop -->
-  <path d="M1170 70V60H1310V70" fill="none" stroke="#26333f" stroke-width="2" marker-end="url(#a)"/>
-  <text x="1163" y="65" fill="#26333f" text-anchor="end" style="font-size:11px">fail &rarr; fix &rarr; verify (max 3 iterations)</text>
-  <!-- NOT_READY -->
-  <path d="M112 300V348" stroke="#c4503b" stroke-width="2" stroke-dasharray="6 4" fill="none" marker-end="url(#r)"/>
-  <text x="120" y="330" fill="#c4503b">NOT_READY</text>
-  <!-- post to Jira -->
-  <path d="M332 300V348" stroke="#26333f" stroke-width="2" fill="none" marker-end="url(#a)"/>
-  <text x="340" y="330" fill="#26333f">post</text>
-  <!-- you edits -> jira -->
-  <path d="M510 225V400H432" stroke="#e29a2b" stroke-width="2" fill="none" marker-end="url(#o)"/>
-  <text x="440" y="392" fill="#8a5a12">edits</text>
-  <!-- recording -->
-  <path d="M640 300V348" stroke="#e29a2b" stroke-width="2" fill="none" marker-end="url(#o)"/>
-  <text x="472" y="330" fill="#8a5a12" display="none"></text>
-  <text x="530" y="326" fill="#8a5a12">needs recording</text>
-  <path d="M740 348V302" stroke="#e29a2b" stroke-width="2" fill="none" marker-end="url(#o)"/>
-  <text x="748" y="326" fill="#8a5a12">resume</text>
-  <!-- stuck -->
-  <path d="M1190 300V348" stroke="#c4503b" stroke-width="2" stroke-dasharray="6 4" fill="none" marker-end="url(#r)"/>
-  <text x="1198" y="330" fill="#c4503b">STUCK</text>
-  <path d="M1300 348V302" stroke="#e29a2b" stroke-width="2" fill="none" marker-end="url(#o)"/>
-  <text x="1307" y="326" fill="#8a5a12">resume</text>
-  <!-- BLOCK -->
-  <path d="M1395 300V322H1356V420H1342" stroke="#c4503b" stroke-width="2" stroke-dasharray="6 4" fill="none" marker-end="url(#r)"/>
-  <text x="1397" y="318" fill="#c4503b">BLOCK</text>
-  <!-- approve -> check in -->
-  <path d="M1500 300V348" stroke="#e29a2b" stroke-width="2" fill="none" marker-end="url(#o)"/>
-  <text x="1508" y="330" fill="#8a5a12">approve</text>
+  <path d="M960 70V58H1130V70" fill="none" stroke="#26333f" stroke-width="2" marker-end="url(#a)"/>
+  <text x="953" y="63" fill="#26333f" text-anchor="end" style="font-size:11px">fail &rarr; fix &rarr; verify (max 3 iterations)</text>
+  <!-- prepare-ticket exits -->
+  <path d="M115 310V358" stroke="#c4503b" stroke-width="2" stroke-dasharray="6 4" fill="none" marker-end="url(#r)"/>
+  <text x="123" y="340" fill="#c4503b">NOT_READY</text>
+  <path d="M355 310V358" stroke="#26333f" stroke-width="2" fill="none" marker-end="url(#a)"/>
+  <text x="363" y="340" fill="#26333f">post</text>
+  <path d="M550 225V415H457" stroke="#e29a2b" stroke-width="2" fill="none" marker-end="url(#o)"/>
+  <text x="480" y="398" fill="#8a5a12">edits</text>
+  <!-- implementer <-> TESTS -->
+  <path d="M960 310V358" stroke="#26333f" stroke-width="2" fill="none" marker-end="url(#a)"/>
+  <text x="968" y="340" fill="#26333f">first pass done</text>
+  <path d="M1090 358V312" stroke="#26333f" stroke-width="2" fill="none" marker-end="url(#a)"/>
+  <text x="1098" y="340" fill="#26333f">tests locked</text>
+  <!-- recording / mismatch -->
+  <path d="M918 410H842" stroke="#e29a2b" stroke-width="2" fill="none" marker-end="url(#o)"/>
+  <text x="880" y="402" text-anchor="middle" fill="#8a5a12" style="font-size:9px">needs recording</text>
+  <text x="880" y="424" text-anchor="middle" fill="#8a5a12" style="font-size:9px">or mismatch</text>
+  <path d="M842 490H918" stroke="#e29a2b" stroke-width="2" fill="none" marker-end="url(#o)"/>
+  <text x="880" y="482" text-anchor="middle" fill="#8a5a12" style="font-size:9px">resume</text>
+  <!-- stuck / block / approve -->
+  <path d="M1200 310V358" stroke="#c4503b" stroke-width="2" stroke-dasharray="6 4" fill="none" marker-end="url(#r)"/>
+  <text x="1208" y="340" fill="#c4503b">STUCK</text>
+  <path d="M1245 358V312" stroke="#e29a2b" stroke-width="2" fill="none" marker-end="url(#o)"/>
+  <text x="1253" y="340" fill="#8a5a12">resume</text>
+  <path d="M1340 310V358" stroke="#c4503b" stroke-width="2" stroke-dasharray="6 4" fill="none" marker-end="url(#r)"/>
+  <text x="1348" y="340" fill="#c4503b">BLOCK</text>
+  <path d="M1540 310V358" stroke="#e29a2b" stroke-width="2" fill="none" marker-end="url(#o)"/>
+  <text x="1548" y="340" fill="#8a5a12">approve</text>
   <!-- legend -->
-  <g transform="translate(20,604)">
+  <g transform="translate(20,670)">
     <path d="M0 8H34" stroke="#26333f" stroke-width="2" marker-end="url(#a)"/><text x="44" y="12" fill="#26333f" style="font-weight:400;font-size:12px">handoff</text>
     <path d="M130 8H164" stroke="#c4503b" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#r)"/><text x="174" y="12" fill="#26333f" style="font-weight:400;font-size:12px">loop stops</text>
     <rect x="270" y="0" width="30" height="16" rx="3" fill="#fdecd0" stroke="#e29a2b" stroke-width="2"/><text x="310" y="12" fill="#26333f" style="font-weight:400;font-size:12px">you act</text>

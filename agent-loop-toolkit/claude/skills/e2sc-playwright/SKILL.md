@@ -5,6 +5,8 @@ description: 'Write, run, and debug Playwright UI tests that drive the live remo
 
 # E2open SCPM Playwright UI Testing (e2sc-playwright)
 
+> **Agent-loop / locked tests (`tests/locked/<TICKET>/`):** read `locked-tests.md` in this folder instead of this file and `guide.md`. Its rules override this file there: no `test.fail`/`fixme`/known-defect markers, no menu clicks (use `startWorkflow` from `tests/loop-helpers.ts`).
+
 Author and maintain end-to-end Playwright tests that drive a **live, remote** E2open SCPM/SSP dev server to verify configuration behaviour through the real UI.
 
 ## The harness

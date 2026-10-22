@@ -48,7 +48,7 @@ It works through these steps:
 | Command | What it does |
 |---|---|
 | `/prepare-ticket <KEY>` | **ticket-intake** decides READY or NOT_READY (questions go to Jira). **test-author** drafts plain-language test cases, which are posted to Jira. You approve or change them in chat and say what access and data the tests may use. test-author then asks you to record the codegen flows those cases need and writes exactly the approved cases as Playwright tests. The coordinator checks one test per case and that each fails for the right reason, then locks them. You don't review the test code. |
-| `/run-loop <KEY>` | Run `/clear` first. Checks the lock, then **implementer** changes config through the skills and runs the gate, up to 3 times. The coordinator re-verifies, **reviewer** checks the change against the ticket, and you get `checkin.md` plus a Jira summary. You approve server actions and commit. |
+| `/run-loop <KEY>` | Run `/clear` first. Checks the lock, then **implementer** changes config through the skills and runs the gate, up to 3 times. The coordinator re-verifies, **reviewer** checks the change against the ticket, and you get `checkin.md` plus a Jira summary. The implementer may run the reload scripts, p2c, restarts and populate itself (see "Ground rules"); you commit. |
 
 ## What's in the kit
 | Path under `claude\` | Purpose |
@@ -56,20 +56,27 @@ It works through these steps:
 | `agents\` | `ticket-intake`, `test-author`, `implementer`, `reviewer` |
 | `commands\` | `setup-project`, `prepare-ticket`, `run-loop` |
 | `hooks\protect-locked-tests.js` | Blocks edits to `tests/locked/<KEY>/` once `.loop/<KEY>/tests.locked` exists |
-| `hooks\loop-ssh-guard.js` | Lets the loop agents SSH to the hosts in your `servers.md` without a prompt (only the implementer may scp outside the inbox), and makes every reload, populate, p2c or restart ask you |
+| `hooks\loop-ssh-guard.js` | Lets the loop agents SSH to the hosts in your `servers.md` without a prompt (only the implementer may scp outside the inbox). A reload, populate, p2c or restart asks you, whichever agent runs it, **except the implementer**, which may run them. The hook can't tell which project's host the implementer is touching, so it allows any host in your `servers.md`; to withdraw the authorisation, make the hook ask for every agent again |
 | `scripts\loop-verify.sh` | The gate: GREEN only if every locked test passes (no retries, no `test.fail`/`skip`/`only`). Prints a short failure digest, also saved as `last-verify-summary.txt` |
+| `loop\harness-template\tests\logic\_template.logic.groovy` | Template for the Logic lane: test-author writes a Groovy harness for logic cases before the build, locks it as `logic.locked`, and `loop-verify.sh` runs it over ssh first. Set `LOGIC_SSH` to the project's e2sc host from `servers.md` |
+| `scripts\loop-check.js` | Mechanical check before locking: every approved case has exactly one test named with its `TC` ID, none for dropped cases, no `test.fail`/`skip`/`fixme`/`only` or fixed delays. `--lock` writes `tests.locked` with hashes, and refuses to overwrite one that already exists. Needs an `Approved case IDs: TC1, TC2` line in `cases.approved` |
+| `skills\e2sc-playwright\locked-tests.md` | Short cheat sheet test-author reads instead of the full skill and guide when writing locked tests: helper imports, `startWorkflow`, one fresh page and login per test (no shared page, no serial mode), control reading, downloads, uploads, test shape and speed tips |
+| `loop\harness-template\recordings\INDEX.md` | Library of recorded flows. test-author checks it before asking for a recording and adds a row when it uses or adds one, so each screen is recorded once |
 | `scripts\jira.js` | Reads, comments on, edits comments on, transitions and creates (`meta`, `create`, `link`) Jira tickets through the SSO browser cookie (`~/.jira-cookie`) |
 | `scripts\jira-login.js` | Refreshes `~/.jira-cookie`: signs in through Entra in a visible browser (prompts for the SSO password, you type the SMS/MFA code), checks the cookie against Jira, then saves it. Needs Playwright (`e2sc-ui_tests/node_modules`). Run `node ~/.claude/scripts/jira-login.js --user <sso-login>` |
 | `scripts\loop-record.js` | Records a UI flow for test-author: launches Playwright codegen with the project's base URL, prints the steps that were requested, never overwrites an earlier recording, and checks the result (has an assertion, ends on the result screen, login types a username). `--check` re-checks a recording; `--dry-run` shows the command. Run `node ~/.claude/scripts/loop-record.js <KEY> <flow>` from the project root |
-| `loop\servers.md` | Per-project hosts and the shared-server rules (reloads, populate, restarts need a human) |
+| `loop\servers.md` | Per-project hosts and the shared-server rules (reloads, populate, p2c and restarts need a human, except when the implementer runs them) |
 | `loop\always-human.md` | Areas the loop never changes without a Jira approval. **Review it for your client.** |
 | `loop\harness-template\` | The Playwright harness `/setup-project` copies into a project |
 | `skills\` | The e2sc/e2na config skills the implementer uses |
 
 ## Ground rules
 - The loop never commits and never moves a ticket past the start transition. You do both.
-- Every dev server is shared. Populate, PCMM/AllBundles reloads, p2c and restarts are yours to run or
-  explicitly authorise.
+- Every dev server is shared. The implementer may run the reload scripts, p2c and restarts, and populate
+  only after a clean PCMM reload. It backs up first, checks the server's health afterwards, and restores
+  and stops if the PCMM reload fails or the server is unhealthy. Every other agent, and you via the main
+  session, are asked first. Read `loop\servers.md` rule 1 before you install: it applies to every host in
+  your `servers.md`.
 - Don't commit `.loop/`, `node_modules/`, `test-results/`, `playwright-report/`, `recordings/`, or any
   cookie or password file.
 

@@ -17,16 +17,24 @@ Look for `*.properties`, `selenium` configs or `hosts` files in the repo before 
 ## Shared-server rules
 Every dev server is shared with other people. A broken server blocks the whole team.
 
-1. **Server actions need a human.** Only the user may authorise populate
-   (`rcp_populate_broker_org_incr.sh`), `reload_pcmm.sh`, `reload_allbundles.sh`, `reload_oc_metamodel.sh`
-   (OCMM), `reload_classes.sh` (Java classes), e2na `p2c.sh` and any e2sc/Tomcat restart. The
-   `~/.claude/hooks/loop-ssh-guard.js` hook enforces this for the named scripts it knows about; any of
-   these commands prompts the user, whichever agent runs it. Other ssh/scp to the hosts in the Projects
+1. **Server actions need a human, except for the implementer.**
+   - Populate (`rcp_populate_broker_org_incr.sh`), the reload scripts (`reload_pcmm.sh`,
+     `reload_allbundles.sh`, `reload_oc_metamodel.sh` (OCMM), `reload_classes.sh` (Java classes) and the
+     other `reload_*.sh`), e2na `p2c.sh` and any e2sc/Tomcat restart need the user, for every agent and the
+     main session **except the implementer**, which the kit authorises to run them on the project's hosts
+     in the Projects table, following rules 2-5 below (populate only after a clean PCMM reload).
+   - The `~/.claude/hooks/loop-ssh-guard.js` hook enforces this for the named scripts it knows about: it
+     prompts the user for these server actions unless the caller is the implementer. **The hook cannot tell
+     which project's host the implementer is touching: it allows any host in the Projects table.** To take
+     the authorisation away, restore the hook's `SERVER_ACTION` check so it asks whichever agent runs them.
+   - Other ssh/scp to the hosts in the Projects
    table is allowed without a prompt for the loop agents (ticket-intake, test-author, implementer,
    reviewer); only the implementer may scp outside the inbox.
-   - When one is needed, stop and hand over the exact commands: deploy, reloads, restart, health checks
-     and rollback.
-   - **Resuming a previously-STUCK/NEEDS_SERVER_ACTION run is not authorisation.** A prior handover
+   - When a human-only action is needed (anything run by another agent, or by the implementer outside its
+     authorisation), stop and hand over the exact commands: deploy, reloads, restart, health checks and
+     rollback.
+   - **Resuming a previously-STUCK/NEEDS_SERVER_ACTION run is not authorisation for anything beyond the
+     implementer's authorisation above.** A prior handover
      saying a reload is needed doesn't mean the user has now said to run it — ask again, in this
      conversation, before running it, even if SSH has started working again or a lot of analysis has
      already gone into the plan.

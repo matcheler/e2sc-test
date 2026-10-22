@@ -27,10 +27,22 @@ export async function startWorkflow(page: Page, wf: string | null): Promise<void
     { timeout: 30000 },
   );
   if (wf) {
-    await page.evaluate((w) => {
-      const t: any = (window as any).rcptop || window;
-      t.getWFM().startWF(w);
-    }, wf);
+    // getWFM() can exist before the home dashboard has mounted, and startWF then throws inside
+    // hideDashboard ("Cannot read properties of undefined (reading 'unmount')"). Retry until it stops
+    // throwing: a readiness condition, not a delay (seen on a dev box, where it took ~300 ms).
+    await page.waitForFunction(
+      (w) => {
+        const t: any = (window as any).rcptop || window;
+        try {
+          t.getWFM().startWF(w);
+          return true;
+        } catch {
+          return false;
+        }
+      },
+      wf,
+      { timeout: 30000, polling: 250 },
+    );
   }
 }
 

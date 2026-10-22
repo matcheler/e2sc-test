@@ -65,6 +65,8 @@ $settings['permissions']['allow'] = @($allow | Where-Object { $_ })
 # Allow the loop's read-only commands and the gate without a prompt (merged, never removed)
 $loopAllow = @(
   'Bash(bash ~/.claude/scripts/loop-verify.sh *)',
+  'Bash(node ~/.claude/scripts/loop-check.js *)',
+  'Bash(node ~/.claude/scripts/loop-record.js * --check)',
   'Bash(node ~/.claude/scripts/jira.js get *)',
   'Bash(node ~/.claude/scripts/jira.js transitions *)',
   'Bash(svn status)', 'Bash(svn status *)', 'Bash(svn diff)', 'Bash(svn diff *)', 'Bash(svn log *)', 'Bash(svn info *)',

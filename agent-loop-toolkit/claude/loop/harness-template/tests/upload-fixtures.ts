@@ -24,7 +24,7 @@ import { columnIndexOf, findHeaderRow, openWorkbook, sheet } from './excel';
 let uniqueCounter = 0;
 
 /**
- * A value that is unique per call and per run, e.g. uniqueValue('PROCT2120-') -> 'PROCT2120-LZ4K9A3F0'.
+ * A value that is unique per call and per run, e.g. uniqueValue('REF-') -> 'REF-LZ4K9A3F0'.
  * The clock separates runs, the counter separates calls in the same millisecond, and the random
  * digit separates two runs that start in the same millisecond.
  */

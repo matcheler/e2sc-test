@@ -1,5 +1,6 @@
 // PreToolUse hook for Bash: SSH/SCP access to the loop's dev servers.
-// - Server actions (reloads, populate, p2c, restarts) always ask the user, whichever agent runs them.
+// - Server actions (populate, reloads, p2c, restarts) ask the user, except for the implementer, which may
+//   run them (the user authorised that on 2026-10-21; see the implementer agent's rules).
 // - The loop subagents may run other ssh/scp commands against the loop hosts without a prompt.
 //   The implementer may scp files anywhere (deploys); the others may upload into the inbox only.
 // - The main session and any other agent get no decision here, so the normal permission flow applies.
@@ -20,7 +21,10 @@ function loopHosts() {
   return hosts;
 }
 const HOSTS = loopHosts();
-const SERVER_ACTION = /(reload_[a-z_]*\.sh|rcp_populate|p2c\.sh|\/e2open\/bin\/restart|\brestart\s+e2(sc|na)\b)/i;
+// Server actions (populate, reload scripts, p2c, restart) need the user, except when the implementer runs
+// them (standing authorisation from the user, 2026-10-21; populate added the same day).
+const POPULATE = /rcp_populate/i;
+const SERVER_ACTION = /(reload_[a-z_]*\.sh|p2c\.sh|\/e2open\/bin\/restart|\brestart\s+e2(sc|na)\b)/i;
 const INBOX = "/e2open/var/shared/ssp/co/inbox/";
 
 function decide(decision, reason) {
@@ -43,7 +47,7 @@ process.stdin.on("end", () => {
   const hostRe = new RegExp(`(^|[\\s@"'])(${HOSTS.map((h) => h.replace(/\./g, "\\.")).join("|")})(?=$|[\\s:"'])`);
   if (!hostRe.test(cmd)) process.exit(0);
 
-  if (SERVER_ACTION.test(cmd)) {
+  if ((POPULATE.test(cmd) || SERVER_ACTION.test(cmd)) && input.agent_type !== "implementer") {
     decide("ask", "Server action on a shared dev server (reload, populate, p2c or restart): the user must approve it.");
   }
 
