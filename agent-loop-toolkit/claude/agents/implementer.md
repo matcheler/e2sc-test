@@ -18,7 +18,7 @@ Before starting, read (the project CLAUDE.md is already in your context):
 
 Server safety:
 - **Hosts.** Use only the host `servers.md` lists for this project, in place of any host a skill hard-codes.
-- **You may run, on that host only:** the `reload_*.sh` scripts (`reload_pcmm.sh`, `reload_allbundles.sh`, `reload_oc_metamodel.sh`, `reload_classes.sh`, `reload_workflows.sh` and the rest), e2na `p2c.sh`, and populate (`rcp_populate_*.sh`), through `eoadmin` as the skills show. Restart (`/e2open/bin/restart e2sc` or `e2na`) only when a change needs one (a new PIT attribute, or a reload that doesn't take effect), and say why in iterations.md.
+- **You may run, on that host only:** the `reload_*.sh` scripts (`reload_pcmm.sh`, `reload_allbundles.sh`, `reload_oc_metamodel.sh`, `reload_classes.sh`, `reload_workflows.sh` and the rest), e2na `p2c.sh`, populate (`rcp_populate_*.sh`), and `upload_psd_mapping_data.sh`, through `eoadmin` as the skills show. Restart (`/e2open/bin/restart e2sc` or `e2na`) only when a change needs one (a new PIT attribute, or a reload that doesn't take effect), and say why in iterations.md.
 - **Populate only after a clean PCMM reload in the same deploy**, and only when needed (a PIT schema change or new PIT attributes, which also need an e2sc restart). A populate after a failed PCMM reload once broke PIT Detail for everyone.
 - **Every time you reload:**
   1. Back up each server file to `*.bak.<TICKET>`, then deploy with plain `cp` then `touch`.
@@ -31,7 +31,7 @@ Server safety:
 FIRST PASS:
 1. Make every change the approved cases and contract call for, through the matching config skill (skills and grouping: step 1 of the ITERATE loop). Don't write tests or touch anything under `e2sc-ui_tests/tests/`.
 2. Deploy and reload as the server-safety rules say. An unhealthy server after the first pass is STUCK, not done.
-3. Check the build against the contract, read-only: labels, control type, place on the screen, states. If the contract can't be met as written (e.g. a field can only render as an auto-complete where the contract says text box), say so in `first-pass.md` and stop with STUCK so the human can change the contract. Don't quietly build something different.
+3. Check the build against the contract from the config you changed, read-only: labels, control type, place on the screen, states. Skip UI probes: don't open the UI or run Playwright or browser checks, the UI tests written after your first pass cover that. If the contract can't be met as written (e.g. a field can only render as an auto-complete where the contract says text box), say so in `first-pass.md` and stop with STUCK so the human can change the contract. Don't quietly build something different.
 4. Write `.loop/<TICKET>/first-pass.md`: files changed, what you built per approved case, the reloads and restarts you ran (command, time, result), and anything that differs from the contract. Start `iterations.md` (the first pass doesn't count towards the budget). Report FIRST_PASS_DONE with the files changed.
 
 If you are given a previous `handover.md`, start from what it says went wrong. If you are given an open `.loop/<TICKET>/contract-mismatch.md`, this is a fix: change only what it lists, reload as above, and append what you changed to `first-pass.md`. Don't rebuild the rest.
