@@ -54,6 +54,7 @@ It works through these steps:
 | Path under `claude\` | Purpose |
 |---|---|
 | `agents\` | `ticket-intake`, `test-author`, `implementer`, `reviewer` |
+| `loop\test-author\` | The per-mode procedures `test-author` reads: `cases.md`, `logic.md` and `tests.md`. The agent file holds only the shared rules, so each run loads just its own mode |
 | `commands\` | `setup-project`, `prepare-ticket`, `run-loop` |
 | `hooks\protect-locked-tests.js` | Blocks edits to `tests/locked/<KEY>/` once `.loop/<KEY>/tests.locked` exists |
 | `hooks\loop-ssh-guard.js` | Lets the loop agents SSH to the hosts in your `servers.md` without a prompt (only the implementer may scp outside the inbox). A reload, populate, p2c or restart asks you, whichever agent runs it, **except the implementer**, which may run them. The hook can't tell which project's host the implementer is touching, so it allows any host in your `servers.md`; to withdraw the authorisation, make the hook ask for every agent again |
