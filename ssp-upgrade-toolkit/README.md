@@ -13,7 +13,7 @@ Phase 1 reads the release notes on Confluence with `node ~/.claude/scripts/confl
 ## Use
 Open Claude Code in the project (SVN working copy) and run `/upgrade-project`. It is resumable via `.upgrade/state.json`.
 
-Phases 5-7 (unit tests, verify, report) can also be run on their own with `/upgrade-validate <JIRA-KEY>` (the upgrade's parent ticket), ideally in a fresh session after `/clear`; `/upgrade-project resume` then picks up again for Phase 8.
+Phases 5-7 (unit tests, verify, report) can also be run on their own with `/upgrade-validate`, ideally in a fresh session after `/clear`; `/upgrade-project resume` then picks up again for Phase 8.
 
 Roles: the **engineer** runs the upgrade and owns Gates A, B, C and D (D: review the report, then check in with SVN); **QA** runs the full end-to-end regression outside this toolkit after the check-in, raises Jira defects for the engineer and shares the test results.
 
