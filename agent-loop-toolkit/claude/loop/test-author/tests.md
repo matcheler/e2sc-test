@@ -80,5 +80,11 @@ An upload can be a case, as long as it stays unit-scope: setup uploads are fine,
   Never use XPath, positional CSS (`nth-child`, `nth-of-type`), or chains of styling classes in a spec.
   Use `.nth()` only for a duplicate you have documented. Shared helpers (`getRcpFrame`, menu navigation,
   field-control helpers) are exempt; call them instead of rewriting them.
+- **Never fake the app.** The result under test must come from the server and the real UI. In locked
+  tests and their helpers, don't use `page.route`, `context.route`, `routeFromHAR`, `addInitScript` or
+  `exposeFunction`, and don't use `evaluate` to change the DOM, set form values, dispatch events or
+  call app functions; the only exception is `startWorkflow` calling `startWF` to open a screen.
+  Read-only `evaluate` (text, attributes, element order) is fine when no locator can express the check.
+  If a case can only pass by faking, the feature isn't built: report it as a behaviour failure.
 - **Check discoveries work, not just that they render.** A probe that only checks a form appears will
   mislead you.
