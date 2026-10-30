@@ -66,7 +66,19 @@ An upload can be a case, as long as it stays unit-scope: setup uploads are fine,
   - Use the host from `~/.claude/loop/servers.md` and a unique filename sequence.
   - Upload under a `.part` name, then `mv` it into place.
   - Find the transaction by reading e2na.log from a byte offset.
-- **No fixed delays** (`waitForTimeout`) to paper over timing. Wait for a concrete condition instead
-  (element visible, function available). The user does not want waiting introduced.
+- **No fixed delays.** No `waitForTimeout` and no `setTimeout` sleeps, including inside loops. Wait on
+  a concrete condition instead: a web-first assertion, `locator.waitFor()`, `expect.poll()` or
+  `expect(...).toPass()`. The user does not want waiting introduced. Don't edit existing locked tests
+  that still use them.
+- **Web-first assertions.** Use `await expect(locator).toBeVisible()` / `toHaveText()` /
+  `toHaveCount()`, never `expect(await locator.isVisible()).toBe(true)`. For values returned by a
+  helper, use `await expect.poll(() => helper(frame)).toEqual(...)`, not `expect(await helper(frame))`.
+  This covers assertions only. `isVisible()` used to choose a path is fine.
+- **Locators.** In spec files, prefer user-facing locators: `getByRole`, `getByLabel`, `getByText`,
+  `getByTitle`. Where a control has no accessible name (hidden selects, `__Autocomplete` inputs, eto
+  widgets), use the stable attribute from the config: `[name="<fieldId>"]` or `[id="<fieldId>"]`.
+  Never use XPath, positional CSS (`nth-child`, `nth-of-type`), or chains of styling classes in a spec.
+  Use `.nth()` only for a duplicate you have documented. Shared helpers (`getRcpFrame`, menu navigation,
+  field-control helpers) are exempt; call them instead of rewriting them.
 - **Check discoveries work, not just that they render.** A probe that only checks a form appears will
   mislead you.
