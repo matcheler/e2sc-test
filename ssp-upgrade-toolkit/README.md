@@ -11,9 +11,15 @@ Install the agent-loop kit first (it provides `/setup-project`, `loop-verify.sh`
 Phase 1 reads the release notes on Confluence with `node ~/.claude/scripts/confluence.js` (installed by this kit, read-only). It needs `~/.confluence-cookie`, an SSO session cookie kept the same way as `~/.jira-cookie`.
 
 ## Use
-Open Claude Code in the project (SVN working copy) and run `/upgrade-project`. It is resumable via `.upgrade/state.json`.
+Open Claude Code in the project (SVN working copy) and run the three commands in order, each ideally in a fresh session after `/clear`. Each one is resumable via `.upgrade/state.json` (`resume`), checks that the previous one finished, and tells you the next one.
 
-Phases 6-8 (merge cases and first run on the upgraded box, verify, report) can also be run on their own with `/upgrade-validate`, ideally in a fresh session after `/clear`; `/upgrade-project resume` then picks up again for Phase 9.
+| Command | Phases | Ends when |
+|---------|--------|-----------|
+| `/upgrade-prepare` | 0 Preflight, 1 Assessment (Gate A), 2 Unit cases and tests on the baseline box (Gate B), plus the version files, your check-in and the Bamboo build | the unit suite is locked and the Bamboo build is green; nothing has touched the target box |
+| `/upgrade-deploy` | 3 Deploy, 4 Capture conflicts (Gate C), 5 Resolve, 5b Conflict report | no open conflicts |
+| `/upgrade-validate` | 6 Merge cases and first run (Gate D), 7 Verify and fix, 8 Report (Gate E), 9 QA regression | QA's results are shared and no QA defects are open |
+
+The rules all three share (roles, the two boxes, server actions, the subagent contract, the `state.json` fields and budgets) are in `claude/upgrade/rules.md`. **Upgrading from the old `/upgrade-project`:** it was renamed to `/upgrade-deploy` and its first half moved into `/upgrade-prepare`; `install.ps1` removes the old command. An upgrade already in progress keeps its phase numbers: continue with the command that owns its phase.
 
 Roles: the **engineer** runs the upgrade and owns Gates A to E (A: assessment, B: unit-test cases before the deploy, C: conflict list, D: cases the merge added, E: review the report, then check in with SVN); **QA** runs the full end-to-end regression outside this toolkit after the check-in, raises Jira defects for the engineer and shares the test results.
 
@@ -39,7 +45,7 @@ Every subagent ends with DONE, NEEDS_DECISION, NEEDS_SERVER_ACTION or STUCK; `up
 | 9 | QA end-to-end regression (after the check-in) | QA | QA runs the full end-to-end regression on the upgraded target box outside this toolkit, raises a Jira defect for each failure (assigned to the engineer) and shares the test results. The engineer gives the orchestrator the results location and the open defect keys; defects are fixed in Phase 7 or 5, the fixes are checked in as a follow-up, and QA retests. Done when results are shared and no open defects remain (or the engineer accepts them in writing). | Results reference and defect list in `report.md` | The last step |
 
 ## Agents
-`/upgrade-project` is the orchestrator: it runs in the main Claude Code session, holds `.upgrade/state.json`, stops at the gates, runs the authorised `setup` commands and delegates the work below. Every subagent ends with DONE, NEEDS_DECISION, NEEDS_SERVER_ACTION or STUCK, and never runs server actions itself.
+The command you are running (`/upgrade-prepare`, `/upgrade-deploy` or `/upgrade-validate`) is the orchestrator: it runs in the main Claude Code session, holds `.upgrade/state.json`, stops at the gates, runs the authorised `setup` commands and delegates the work below. Every subagent ends with DONE, NEEDS_DECISION, NEEDS_SERVER_ACTION or STUCK, and never runs server actions itself.
 
 ![SSP upgrade agents: the phases, agents, gates and handoffs](docs/upgrade-agents.png)
 
@@ -62,8 +68,10 @@ The agents use these skills for config changes and checks: `e2sc-config`, `e2sc-
 - Platform lessons go in `~/.claude/upgrade/gotchas.md` (kept on reinstall). Keep customer names and hosts out of it.
 
 ## Contents
-- `claude/commands/upgrade-project.md` - orchestrator
-- `claude/commands/upgrade-validate.md` - Phases 6-8: merge cases and first run on the upgraded box, verify and fix, report
+- `claude/commands/upgrade-prepare.md` - Phases 0-2: preflight, assessment, unit tests on the baseline box, version files and build
+- `claude/commands/upgrade-deploy.md` - Phases 3-5b: deploy, conflicts, resolve, conflict report (was `upgrade-project.md`)
+- `claude/commands/upgrade-validate.md` - Phases 6-9: merge cases and first run on the upgraded box, verify and fix, report, QA regression
+- `claude/upgrade/rules.md` - rules shared by the three commands
 - `claude/scripts/confluence.js` - read-only Confluence client (release notes, build number)
 - `claude/agents/upgrade-assessor.md`, `upgrade-merger.md`, `upgrade-reviewer.md`, `upgrade-test-author.md`, `upgrade-verifier.md`
 - `docs/upgrade-agents.png`, `upgrade-agents.svg` - agent and phase diagram

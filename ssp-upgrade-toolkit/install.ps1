@@ -14,8 +14,15 @@ Get-ChildItem $src -Recurse -File | ForEach-Object {
     Write-Host "copy   $rel"
 }
 
+# commands this kit no longer ships (renamed or split)
+$retired = @('commands\upgrade-project.md')
+foreach ($rel in $retired) {
+    $target = Join-Path $Dest $rel
+    if (Test-Path $target) { Remove-Item $target; Write-Host "remove $rel" }
+}
+
 # prerequisite check: the agent-loop kit
 $missing = @('commands\setup-project.md','loop\servers.md','loop\test-author\tests.md','scripts\loop-verify.sh','scripts\loop-record.js','skills\e2sc-playwright\locked-tests.md') |
     Where-Object { -not (Test-Path (Join-Path $Dest $_)) }
 if ($missing) { Write-Warning "Agent-loop kit not found in $Dest. Missing: $($missing -join ', '). Install it first." }
-else { Write-Host 'Prerequisites OK. Run /upgrade-project in your project.' }
+else { Write-Host 'Prerequisites OK. Run /upgrade-prepare in your project.' }
