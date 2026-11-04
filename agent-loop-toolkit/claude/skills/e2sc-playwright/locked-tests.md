@@ -3,6 +3,8 @@
 Read this INSTEAD of `SKILL.md` / `guide.md` when writing tests under `e2sc-ui_tests/tests/locked/<TICKET>/`.
 Open `guide.md` only for a control or screen not covered here (grep it, don't read it whole).
 
+> **Two-phase tickets** (`tests/locked/<TICKET>/specs/` and `pages/`, locked by `ui.locked`): the specs were written before the build by ui-assert and are read-only. In UI-BIND mode you write **`pages/` method bodies only**; specs never sign in through `beforeEach` (sign-in is a page-object step). The patterns below (login, `startWorkflow`, frames, controls, downloads) go inside page methods, never `expect`. Where this file disagrees with `~/.claude/loop/test-author/ui-bind.md`, `ui-bind.md` wins.
+
 ## Rules that differ from the rest of the suite
 - No `test.fail`, `test.skip`, `test.fixme`, `test.only`. The gate rejects them. A test for missing behaviour is a plain `test()` that is RED until the config exists. Ignore any "known-defect" / `fixme` convention in `SKILL.md`.
 - Don't click through the menu. Use `startWorkflow` (below).

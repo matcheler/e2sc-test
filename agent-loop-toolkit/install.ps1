@@ -30,12 +30,18 @@ Get-ChildItem $kit -Recurse -File | ForEach-Object {
   if ((Test-Path $target) -and ($personal -or -not $Force)) { $kept++ } else { Copy-Item $_.FullName $target -Force; $copied++ }
 }
 Write-Host "Copied $copied file(s) into $dest; kept $kept existing file(s)$(if ($kept -and -not $Force) {' (use -Force to overwrite)'})."
+# Retired kit files (replaced in this version): remove them so no agent reads the old procedure.
+foreach ($old in 'loop\test-author\tests.md') {
+  $p = Join-Path $dest $old
+  if (Test-Path $p) { Remove-Item $p -Force; Write-Host "Removed retired $old (TESTS mode is replaced by ui-assert + UI-BIND)." }
+}
 
 # Register the PreToolUse hook
 $settingsPath = Join-Path $dest 'settings.json'
 $hookPath = (Join-Path $dest 'hooks\protect-locked-tests.js') -replace '\\', '/'
 $hookCmd = "node `"$hookPath`""
-$matcher = 'Edit|Write|MultiEdit|NotebookEdit|Bash|PowerShell'
+# Read is in the matcher for the ui-assert agent's read sandbox; every other Read exits at once.
+$matcher = 'Read|Edit|Write|MultiEdit|NotebookEdit|Bash|PowerShell'
 if (Test-Path $settingsPath) {
   Copy-Item $settingsPath "$settingsPath.bak-$(Get-Date -Format yyyyMMddHHmmss)"
   try { $settings = Get-Content $settingsPath -Raw | ConvertFrom-Json -AsHashtable }
@@ -45,7 +51,11 @@ if ($null -eq $settings) { $settings = @{} }
 if (-not $settings.ContainsKey('hooks')) { $settings['hooks'] = @{} }
 if (-not $settings['hooks'].ContainsKey('PreToolUse')) { $settings['hooks']['PreToolUse'] = @() }
 $already = $settings['hooks']['PreToolUse'] | Where-Object { ($_.hooks | ForEach-Object { $_.command }) -match 'protect-locked-tests' }
-if ($already) { Write-Host 'Lock hook already registered.' }
+if ($already) {
+  # An older install registered the hook without Read; bring its matcher up to date.
+  foreach ($h in @($already)) { if ($h.matcher -ne $matcher) { Write-Host "Lock hook matcher updated: '$($h.matcher)' -> '$matcher'."; $h.matcher = $matcher } }
+  Write-Host 'Lock hook already registered.'
+}
 else {
   $settings['hooks']['PreToolUse'] = @($settings['hooks']['PreToolUse']) + @(@{ matcher = $matcher; hooks = @(@{ type = 'command'; command = $hookCmd }) })
   Write-Host 'Lock hook registered.'
@@ -66,6 +76,7 @@ $settings['permissions']['allow'] = @($allow | Where-Object { $_ })
 $loopAllow = @(
   'Bash(bash ~/.claude/scripts/loop-verify.sh *)',
   'Bash(node ~/.claude/scripts/loop-check.js *)',
+  'Bash(node ~/.claude/scripts/loop-ui-check.js *)',
   'Bash(node ~/.claude/scripts/loop-record.js * --check)',
   'Bash(node ~/.claude/scripts/jira.js get *)',
   'Bash(node ~/.claude/scripts/jira.js transitions *)',
@@ -88,8 +99,15 @@ New-Item -ItemType Directory -Force (Join-Path $tmp '.loop\X-1') | Out-Null
 New-Item -ItemType File (Join-Path $tmp '.loop\X-1\tests.locked') | Out-Null
 $payload = @{ cwd = $tmp; tool_name = 'Edit'; tool_input = @{ file_path = (Join-Path $tmp 'e2sc-ui_tests\tests\locked\X-1\a.spec.ts') } } | ConvertTo-Json -Compress
 $payload | node $hookPath 2>$null; $code = $LASTEXITCODE
+# ui-assert (Phase A) may read only its inputs: a source file must be blocked.
+$payload2 = @{ cwd = $tmp; tool_name = 'Read'; agent_type = 'ui-assert'; tool_input = @{ file_path = (Join-Path $tmp 'solution\pom.xml') } } | ConvertTo-Json -Compress
+$payload2 | node $hookPath 2>$null; $code2 = $LASTEXITCODE
+# Any other caller's Read passes straight through.
+$payload3 = @{ cwd = $tmp; tool_name = 'Read'; tool_input = @{ file_path = (Join-Path $tmp 'solution\pom.xml') } } | ConvertTo-Json -Compress
+$payload3 | node $hookPath 2>$null; $code3 = $LASTEXITCODE
 Remove-Item $tmp -Recurse -Force
 if ($code -eq 2) { Write-Host 'Hook self-test passed (locked edit blocked).' } else { Write-Warning "Hook self-test FAILED (exit $code). Locked tests are not protected." }
+if ($code2 -eq 2 -and $code3 -eq 0) { Write-Host 'Hook self-test passed (ui-assert read sandbox).' } else { Write-Warning "ui-assert read sandbox self-test FAILED (ui-assert exit $code2, other reader exit $code3)." }
 
 Write-Host ''
 Write-Host 'Next: restart Claude Code, open your project folder, and run /setup-project'
