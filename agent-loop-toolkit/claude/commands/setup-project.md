@@ -1,9 +1,14 @@
 ---
 description: One-off setup of the agent loop for this project - check the kit, collect dev server details, verify access, create the Playwright harness, register the project
-argument-hint: [project folder, default = current]
+argument-hint: <branch name, e.g. myclient_10_rel>
 ---
 
-Project: $ARGUMENTS (if empty, use the SVN working-copy root that contains the current directory)
+Branch: $ARGUMENTS
+
+If the branch is empty, stop straight away and reply only:
+"Usage: `/setup-project <branch>`, e.g. `/setup-project myclient_10_rel`". Run no checks until a branch is given.
+
+The project folder is always the SVN working-copy root that contains the current directory.
 
 You are setting up the agent loop (`/prepare-ticket`, `/run-loop`) for a project that hasn't used it
 before. The engineer running this may be new to the kit. Explain each step in one line as you go.
@@ -43,6 +48,12 @@ If kit files are missing, stop and tell them to run the kit installer, `install.
   ask whether to re-verify it or change it.
 - **Layout:** read the project's `CLAUDE.md` if there is one. If there isn't, note that
   the loop works best with one that describes the ssp-ext layout, and offer to draft one later.
+- **Branch:** run `svn info` in the project root and compare the last part of its `Relative URL`
+  with the branch argument (e.g. `^/<CLIENT>/myclient_10_rel` matches `myclient_10_rel`).
+  - **Match:** record the full `Relative URL` and `URL`.
+  - **No match:** stop and say the working copy is on `<actual>`, not `<argument>`. Ask with
+    AskUserQuestion whether to continue with the working copy's branch, or stop so the engineer can
+    open the right folder or run `svn switch`. **Never run `svn switch` yourself.**
 - **Baseline:** run `svn status`, list the pre-existing local changes, and warn about any credential
   file in the working copy (e.g. `jira-cookie.txt`).
 - **Pre-fill:** find candidate servers to offer, so the engineer can pick rather than type.
@@ -89,6 +100,7 @@ so this takes 2 or 3 rounds. You need:
   - the e2sc reload scripts: find them, e.g. `ls /e2open/app/e2sc/server/bin/reload_*.sh rcp_populate*`
   - the p2c script
   - Record the paths you find. **Do not run any of them.**
+- **Branch:** run `svn info <branch URL>` to confirm it exists on the server.
 - **Existing log errors:** grep today's e2sc.log for `SuperCompException`, `Undefined Base DataMeasure`
   or NullPointerException. Record anything that was already there as a known problem.
 
@@ -151,6 +163,7 @@ Add or update this project's row in the `## Projects` table of `~/.claude/loop/s
 - the harness path
 
 Under the table, add a `### <folder>` section with:
+- the SVN branch (relative path and full URL) and whether the working copy matches it
 - the server paths you found in step 4
 - whether inbox drops are allowed
 - any known pre-existing errors
@@ -158,7 +171,8 @@ Under the table, add a `### <folder>` section with:
 ## 8. Write the summary
 Write `<project>/.loop/SETUP.md` with:
 - the date
-- each check and its result (kit, access, harness smoke test, Jira)
+- the SVN branch
+- each check and its result (kit, access, branch, harness smoke test, Jira)
 - the servers.md row
 - anything still to do: a missing password, a missing CLAUDE.md, the always-human list reviewed for
   this client, harness commit decisions
