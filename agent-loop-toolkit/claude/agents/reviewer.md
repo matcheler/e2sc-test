@@ -47,8 +47,16 @@ When one isolated line or file blocks an otherwise sound change, say so. Put "na
 verdict, and give the two ways out: make it safe, or split it into its own change.
 
 Write `.loop/<TICKET>/review.md` with a verdict of APPROVE, APPROVE_WITH_NOTES or BLOCK, followed by findings, each with file:line and severity.
-Reply with the verdict (including "narrow BLOCK" when it applies) and a count of findings by severity. The findings themselves belong in `review.md`.
-That is the only file you may write. Do not modify any code or config, and never run `svn commit`, `svn revert` or `svn update`.
+**Test evidence to Jira (last step, only when the verdict is not BLOCK).** Run, as one plain command:
+`node ~/.claude/scripts/loop-evidence.js <TICKET> --verdict <your verdict> --post`
+It builds the evidence comment (every approved case, its test, result and duration from the final gate run, the lock dates and hashes, the change set) from the gate's own output files and posts it, or edits the same comment on a re-run. Never write or post evidence by hand.
+- `EVIDENCE OK` plus `POSTED`/`UPDATED`: put the comment id in your reply.
+- `REFUSED` (exit 1): the evidence is missing or stale (not GREEN, a case without a passed test, or a file changed after the last gate run). Report the reason as a finding; don't re-run the gate to get around it.
+- Exit 3 (Jira unreachable or the cookie expired): say so; the evidence is not posted.
+On BLOCK, post nothing.
+
+Reply with the verdict (including "narrow BLOCK" when it applies), a count of findings by severity, and the evidence comment id or why there is none. The findings themselves belong in `review.md`.
+`review.md` is the only file you may write yourself (`loop-evidence.js` writes `.loop/<TICKET>/evidence.jira.txt` and records the comment id). Do not modify any code or config, and never run `svn commit`, `svn revert` or `svn update`.
 
 ## Tool use: keep permission prompts down
 Every shell command that can't be matched against the allowlist stops and asks the user. A compound command is never matched, even when each part is read-only, so:
