@@ -22,7 +22,7 @@ foreach ($rel in $retired) {
 }
 
 # prerequisite check: the agent-loop kit
-$missing = @('commands\setup-project.md','loop\servers.md','loop\test-author\tests.md','scripts\loop-verify.sh','scripts\loop-record.js','skills\e2sc-playwright\locked-tests.md') |
+$missing = @('commands\setup-project.md','loop\servers.md','loop\test-author\ui-bind.md','scripts\loop-verify.sh','scripts\loop-record.js','skills\e2sc-playwright\locked-tests.md') |
     Where-Object { -not (Test-Path (Join-Path $Dest $_)) }
 if ($missing) { Write-Warning "Agent-loop kit not found in $Dest. Missing: $($missing -join ', '). Install it first." }
-else { Write-Host 'Prerequisites OK. Run /upgrade-prepare in your project.' }
+else { Write-Host 'Prerequisites OK. Run /upgrade-prepare <JIRA-KEY|none> in your project.' }

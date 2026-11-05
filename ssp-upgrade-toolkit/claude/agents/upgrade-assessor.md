@@ -18,10 +18,10 @@ Produce `assessment.md` in your component directory:
 4. **Build and dependency changes**: pom/comp_dependencies diffs, Java version, new or removed modules.
 5. **Platform release/migration notes** found in the new drop and in `release-info.md`, and anything needing DB/schema or server-side migration.
 6. **Proposed merge strategy per file type**, and the files needing a human decision.
-7. **Test focus**: which behaviours the risks threaten (this feeds the unit-test cases that `upgrade-test-author` drafts after the merge, and QA's regression planning).
+7. **Test focus**: which behaviours the risks threaten, and a **suggested test** for each HIGH item and each MEDIUM item that needs a change (the behaviour that must still hold after the upgrade). This feeds the unit-test cases that `upgrade-test-author` drafts before the deploy, and QA's regression planning.
 
-8. **Ticket drafts** in `jiras.md` in your component directory: one child per HIGH-risk file or group and per MEDIUM group needing a change (the orchestrator composes the single parent ticket). Each has summary, description (files, platform change, proposed resolution, risk), acceptance criteria and a suggested test case. Draft only; never create tickets yourself.
+No Jira tickets: don't draft tickets, don't write `jiras.md`, and don't list tickets to create. Each item is referenced by its id.
 
-Also write `assessment.json` in your component directory: a list of items `{id, component, file, overlayType, risk, platformChanged, resolution, ticket: null}`. The orchestrator fills `ticket`; conflicts, tests and the report refer to `id`.
+Also write `assessment.json` in your component directory: a list of items `{id, component, file, overlayType, risk, platformChanged, resolution, suggestedTest}` (`suggestedTest` is null for LOW items). Conflicts, tests and the reports refer to `id`.
 
 Be specific (file paths, the changed lines). Don't guess: if you can't compare something, say so. End with a status: DONE, NEEDS_DECISION or STUCK.

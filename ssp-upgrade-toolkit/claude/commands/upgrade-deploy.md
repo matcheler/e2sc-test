@@ -1,17 +1,18 @@
 ---
 description: Step 2 of 3 of an SSP upgrade - deploy the target version onto the upgrade box, capture and resolve the conflicts, conflict report. Run after /upgrade-prepare; resumable; stops at human gates.
-argument-hint: [resume]
+argument-hint: <JIRA-KEY|none> [resume]
 ---
 
-Argument: $ARGUMENTS (empty or `resume`: continue from `.upgrade/state.json`).
+Arguments: $ARGUMENTS. The first word is the upgrade's Jira key (the one given to `/upgrade-prepare`) or `none`; an optional second word `resume`. Either way, continue from `.upgrade/state.json`.
 
 This is the second of the three upgrade commands: `/upgrade-prepare`, then `/upgrade-deploy` (this one, Phases 3-5b), then `/upgrade-validate`. **Read `~/.claude/upgrade/rules.md` first**: the roles, the two boxes, the server-action rules, the subagent return contract, the `state.json` fields and the budgets are defined there and apply here. If it is missing, stop and tell the engineer to reinstall the kit. Ideally run it in a fresh session (`/clear` first): everything it needs is in `.upgrade/` and `.loop/`.
 
 ## Before you start
-1. `.upgrade/state.json` must exist with Gates A and B recorded, the Phase 2 suite locked (`unitSuiteLocked` in state and `.loop/<TICKET>-unit/tests.locked`), the version files checked in (`versionFilesRevision`) and a green Bamboo build (`bamboo`). If not, stop and tell the engineer to continue with `/upgrade-prepare resume`. Exception: an upgrade started under the old numbering records Gate B as "skipped: upgrade predates Phase 2" (rules.md) and has no Phase 2 suite.
-2. **Read the test id.** `<TICKET>` is `ticket` in `state.json`. If it is missing, stop and tell the engineer to continue with `/upgrade-prepare resume`, which records it. Never ask for one or invent one.
+0. **The Jira key.** Handle the key argument as "The Jira key argument" in rules.md says: parse it, check it with `jira.js get` (unless `none`), and compare it with `jiraKey` in state; stop if it is missing or differs.
+1. `.upgrade/state.json` must exist with Gates A and B recorded, the Phase 2 suite locked (`unitSuiteLocked` in state and `.loop/<TICKET>-unit/tests.locked`), the version files checked in (`versionFilesRevision`) and a green Bamboo build (`bamboo`). If not, stop and tell the engineer to continue with `/upgrade-prepare <KEY> resume`. Exception: an upgrade started under the old numbering records Gate B as "skipped: upgrade predates Phase 2" (rules.md) and has no Phase 2 suite.
+2. **Read the test id.** `<TICKET>` is `ticket` in `state.json`. If it is missing, stop and tell the engineer to continue with `/upgrade-prepare <KEY> resume`, which records it. Never ask for one or invent one.
 3. Read `authorisation` in state: it says whether the orchestrator may run `setup remove`, `setup` and the `setup migrate` commands on the target box. Check that the target box recorded there is the box you are about to use.
-4. Read `~/.claude/upgrade/gotchas.md`. Only the orchestrator (this session) writes `state.json`: update it after every step. On `resume`, skip what is already done: a recorded deploy with a clean smoke check means Phase 4; Gate C recorded means Phase 5; no open conflicts and a clean smoke check after the last redeploy means Phase 5b; `conflict-report.html` written means this command is finished.
+4. Read `~/.claude/upgrade/gotchas.md`. Only the orchestrator (this session) writes `state.json`: update it after every step. On `resume`, skip what is already done: a recorded deploy with a clean smoke check means Phase 4; Gate C recorded means Phase 5; no open conflicts and a clean smoke check after the last redeploy means Phase 5b; `conflict-report.html` written and published (`conflictReport` in state has a URL) means this command is finished.
 
 ## Phase 3, steps 3-5 - Deploy the target version (this is where conflicts first appear)
 Steps 1-2 (version files, check-in, Bamboo build) were done in `/upgrade-prepare`.
@@ -22,7 +23,7 @@ Steps 1-2 (version files, check-in, Bamboo build) were done in `/upgrade-prepare
 ## Phase 4 - Capture conflicts -> GATE C (engineer)
 The merge happens as part of deployment: conflicts only appear once the target platform and the overlay are deployed together (Phase 3, and again after each resolve round in Phase 5).
 1. If the deployment also needs e2na p2c, e2sc reloads or a restart, show the engineer those exact commands and let them run or authorise them. Stop at the first failure and report; never push through, because a failed deploy can leave the server half-configured.
-2. Capture the conflicts the deployment reported (deploy output, conflict/reject files, startup and reload errors in the logs; read-only) into `.upgrade/conflicts.md`, each tagged with its assessment risk and ticket key.
+2. Capture the conflicts the deployment reported (deploy output, conflict/reject files, startup and reload errors in the logs; read-only) into `.upgrade/conflicts.md`, each tagged with its assessment risk and assessment id.
 3. Cross-check: every HIGH item in `assessment.json` must either appear in `conflicts.md` or be marked "no action, because...". Show the engineer the list and get approval to start resolving (Gate C).
 
 ## Phase 5 - Resolve conflicts
@@ -30,17 +31,18 @@ Delegate to the `upgrade-merger` subagent with `.upgrade/conflicts.md`. It resol
 
 ## Phase 5b - Conflict report (after the deployment succeeds)
 Runs once, after the last resolve round's redeploy has succeeded and the smoke check is clean. It is a read-only summary of what the deployment reported and what the merge did, so the engineer and QA can see it without reading the working files.
-1. Build `.upgrade/conflict-report.html` from `conflicts.md`, `merge-log.md`, `assessment.json` and `iterations.md` (if present). One self-contained HTML file (inline CSS, no external scripts, readable in light and dark mode). Contents:
-   - header: ticket, current -> target version, target box, date, and the redeploy count used
+1. Build `.upgrade/conflict-report.html` from `conflicts.md`, `merge-log.md`, `assessment.json` and `iterations.md` (if present). One self-contained HTML file, following the shared-report rules in rules.md. Contents:
+   - header: test id, current -> target version, target box, date, and the redeploy count used
    - summary counts: conflicts captured, merged, left for the engineer, and by risk (HIGH / MEDIUM / LOW)
-   - table of **conflicts** (file, component, risk, ticket key, what conflicted, and the round it was first seen in)
-   - table of **merged conflicts** (file, assessment id, how it was resolved, which side(s) were kept, ticket key)
+   - table of **conflicts** (file, component, risk, assessment id, what conflicted, and the round it was first seen in)
+   - table of **merged conflicts** (file, assessment id, how it was resolved, which side(s) were kept)
    - table of **FIX-NEEDED** items (file, scenario, likely cause, proposed fix), marked "for triage at Gate D"
    - any conflict still open, with the reason and who must decide
    - the final deployment and smoke-check result
    No credentials, hostnames beyond the box name, or log extracts.
-2. Record the path in state (`conflictReport`); `/upgrade-validate` lists it in `report.md` (Phase 8).
-3. Share it: give the engineer the path and, when the engineer says so, attach it to the parent ticket or send it to QA so they can plan their regression. Don't publish it anywhere yourself, and never transition tickets.
+2. Publish it as a private Artifact (rules.md) and record the path and URL in state (`conflictReport`); `/upgrade-validate` lists both in `report.md` (Phase 8). If a later round changes it, re-publish to the same URL.
+3. Attach it to `jiraKey`: `node ~/.claude/scripts/jira-attach.js <KEY> .upgrade/conflict-report.html conflict-report-<yyyy-mm-dd>.html` (skipped when the key is `none`), and record the attachment id in state (`conflictReport`, `jiraWrites`). If it changes later, attach the new version too (rules.md).
+4. Share it: give the engineer the path, the link and the attachment id, to send the link to QA (or post where the engineer chooses) so they can plan their regression. Don't share or post the Artifact link yourself.
 
 ## Done
-When no conflicts remain and the conflict report is written, record the phase in state and tell the engineer: run `/clear`, then `/upgrade-validate` (Phases 6-9: the cases the merge added, the first run on the target box, verify and fix, the report, and QA's regression).
+When no conflicts remain and the conflict report is written, published and attached (or the key is `none`), record the phase in state and tell the engineer: run `/clear`, then `/upgrade-validate <KEY>` (Phases 6-9: the cases the merge added, the first run on the target box, verify and fix, the report, and QA's regression).
