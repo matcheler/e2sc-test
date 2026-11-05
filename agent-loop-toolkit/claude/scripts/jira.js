@@ -23,7 +23,7 @@ const COOKIE_FILE = process.env.JIRA_COOKIE_FILE || path.join(os.homedir(), ".ji
 function die(msg, code = 1) { process.stderr.write(msg + "\n"); process.exit(code); }
 
 let cookie;
-try { cookie = fs.readFileSync(COOKIE_FILE, "utf8").trim(); } catch { die(`No Jira cookie at ${COOKIE_FILE}. Run \`node ~/.claude/scripts/jira-login.js\` (password + SMS code in a browser window), or copy the Cookie request header from DevTools and run: Get-Clipboard | Set-Content -NoNewline "$HOME\\.jira-cookie"`); }
+try { cookie = fs.readFileSync(COOKIE_FILE, "utf8").trim(); } catch { die(`No Jira cookie at ${COOKIE_FILE}. Run \`node ~/.claude/scripts/jira-login.js\` (username only; finish any SMS or push step in the browser window), or copy the Cookie request header from DevTools and run: Get-Clipboard | Set-Content -NoNewline "$HOME\\.jira-cookie"`); }
 
 async function call(method, url, body) {
   const res = await fetch(url.startsWith("http") ? url : BASE + url, {
@@ -38,7 +38,7 @@ async function call(method, url, body) {
     body: body ? JSON.stringify(body) : undefined,
   });
   if (res.status === 302 || res.status === 401 || (res.headers.get("content-type") || "").includes("text/html")) {
-    die("JIRA_AUTH_EXPIRED: the SSO session cookie is no longer valid. Ask the user to refresh ~/.jira-cookie: run `node ~/.claude/scripts/jira-login.js` (password + SMS code in a browser window), or copy the Cookie header from DevTools.", 3);
+    die("JIRA_AUTH_EXPIRED: the SSO session cookie is no longer valid. Ask the user to refresh ~/.jira-cookie: run `node ~/.claude/scripts/jira-login.js` (username only; finish any SMS or push step in the browser window), or copy the Cookie header from DevTools.", 3);
   }
   if (!res.ok) die(`Jira ${method} ${url} failed: HTTP ${res.status}\n${(await res.text()).slice(0, 1000)}`);
   return res;

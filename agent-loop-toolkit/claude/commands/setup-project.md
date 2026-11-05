@@ -138,8 +138,8 @@ so this takes 2 or 3 rounds. You need:
     `~/.jira-sso-user`: if it exists, show it and ask whether it is still right.
   - **Preferred:** tell them to run `node ~/.claude/scripts/jira-login.js --user <that login>` in their
     own terminal, from this project (it needs `e2sc-ui_tests/node_modules`, so run it after the harness
-    exists). It prompts for the SSO password (hidden), signs in in a visible browser, and they type
-    the SMS code. The login name is remembered in `~/.jira-sso-user`, so later runs need no `--user`.
+    exists). It needs only the username, signs in in a visible browser, and they finish
+    any SMS or push step there. The login name is remembered in `~/.jira-sso-user`, so later runs need no `--user`.
     Never ask for the password in the chat or store it in a file.
   - **Manual fallback:**
   1. Log in to Jira in the browser.

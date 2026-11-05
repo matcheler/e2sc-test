@@ -11,8 +11,8 @@ Jira access: `node ~/.claude/scripts/jira.js <get|comment|edit-comment|transitio
 - The cookie is read from `~/.jira-cookie`. If the user names a different file, set `JIRA_COOKIE_FILE`.
 - If a call exits with JIRA_AUTH_EXPIRED, stop and ask the user to refresh the cookie. Preferred:
   `node ~/.claude/scripts/jira-login.js --user <sso-login>` (run from a project that has
-  `e2sc-ui_tests/node_modules`; it asks for the SSO password, signs in in a visible browser, and the
-  user types the SMS code). Fallback: DevTools → Network → the ticket request → Request Headers →
+  `e2sc-ui_tests/node_modules`; it asks only for the username, signs in in a visible browser, and the
+  user finishes any SMS or push step there). Fallback: DevTools → Network → the ticket request → Request Headers →
   Cookie → Copy value, then `Get-Clipboard | Set-Content -NoNewline "$HOME\.jira-cookie"`, after a
   fresh SSO login. Never put the SSO password in a file or paste it into the chat.
 - **Jira comments:** one per phase. When the same phase is updated (e.g. revised questions or cases),

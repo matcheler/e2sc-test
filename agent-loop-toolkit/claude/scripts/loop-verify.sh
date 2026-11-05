@@ -120,8 +120,9 @@ PLAYWRIGHT_JSON_OUTPUT_NAME="$LOOP/last-ui.json" npx playwright test "tests/lock
 rc=$?
 cd "$ROOT" || exit 1
 classify() { [ "$TWO_PHASE" = "1" ] && { echo; node "$UICHECK" "$TICKET" --classify 2>&1; }; }
-# Exit 0 alone is not enough: also require at least one pass and no failed/flaky/skipped tests.
-if [ "$rc" = "0" ] && grep -qE "[0-9]+ passed" "$LOG" && ! grep -qE "[0-9]+ (failed|flaky|skipped)" "$LOG"; then
+# Exit 0 alone is not enough: also require at least one pass and no failed/flaky/skipped tests. Anchored to
+# Playwright's indented summary lines, so the Logic lane's "LOGIC: 4 passed, 0 failed" in the same log counts for neither.
+if [ "$rc" = "0" ] && grep -qE "^ +[0-9]+ passed" "$LOG" && ! grep -qE "^ +[1-9][0-9]* (failed|flaky|skipped)" "$LOG"; then
   echo "GREEN: all locked tests for $TICKET passed ($(grep -oE '[0-9]+ passed' "$LOG" | tail -1))." | tee -a "$LOG" | tee "$SUMMARY"
   classify >> "$SUMMARY"
   exit 0
